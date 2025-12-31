@@ -1,0 +1,9 @@
+hit_first
+hit_at
+TP1_closed_at
+sl3_at
+sl5_at
+sl10_at
+closed_at
+after_3days
+current_price
