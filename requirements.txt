@@ -1,0 +1,28 @@
+# Data Manipulation
+pandas
+numpy
+
+# Machine Learning
+scikit-learn
+xgboost
+lightgbm
+scikit-optimize  # Bayesian Optimization
+joblib           # For saving/loading models efficiently
+
+# API & Serving
+fastapi
+uvicorn
+pydantic
+
+# Plotting & Explainability
+matplotlib
+seaborn
+shap
+
+# Testing
+pytest
+httpx
+
+# Code Quality
+black
+flake8
