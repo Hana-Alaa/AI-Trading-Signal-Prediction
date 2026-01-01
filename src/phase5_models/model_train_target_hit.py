@@ -213,14 +213,28 @@ def evaluate_model(model, X_val, y_val, model_label, X_train=None, y_train=None)
     best_thresh = 0.5
     y_pred_best = None
 
-    # Test several thresholds
-    for t in [0.3, 0.4, 0.5, 0.6]:
+    # Tune threshold in fine increments
+    thresholds = np.linspace(0.05, 0.95, 19)
+    f1_scores = []
+
+    for t in thresholds:
         y_pred = (y_prob >= t).astype(int)
         f1 = f1_score(y_val, y_pred, zero_division=0)
+        f1_scores.append(f1)
         if f1 > best_f1:
-            best_f1 = f1
-            best_thresh = t
-            y_pred_best = y_pred
+            best_f1, best_thresh, y_pred_best = f1, t, y_pred
+
+    # Optional: plot F1 vs threshold
+    plt.figure(figsize=(6, 4))
+    plt.plot(thresholds, f1_scores, marker='o', label='F1 Score')
+    plt.axvline(best_thresh, color='red', linestyle='--', label=f'Best Threshold: {best_thresh:.2f}')
+    plt.title(f"F1 vs Threshold – {model_label}")
+    plt.xlabel("Threshold")
+    plt.ylabel("F1 Score")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
 
     # === Validation metrics ===
     prec = precision_score(y_val, y_pred_best, zero_division=0)
@@ -260,23 +274,45 @@ def evaluate_model(model, X_val, y_val, model_label, X_train=None, y_train=None)
         "precision": prec,
         "recall": rec,
         "f1_score": f1,
-        "roc_auc": roc
+        "roc_auc": roc,
+        "best_threshold": float(best_thresh)
     }
+
+from sklearn.isotonic import IsotonicRegression
+class CalibratedModelWrapper:
+    def __init__(self, base_model, iso_model):
+        self.base_model = base_model
+        self.iso_model = iso_model
+
+    def predict_proba(self, X):
+        base_probs = self.base_model.predict_proba(X)[:, 1]
+        calibrated_probs = self.iso_model.predict(base_probs)
+        # return probabilities for both classes (n, 2)
+        return np.vstack([1 - calibrated_probs, calibrated_probs]).T
+
+    def predict(self, X, threshold=0.5):
+        return (self.predict_proba(X)[:, 1] >= threshold).astype(int)
 
 def calibrate_best_model(model, X_val, y_val, model_label, method='isotonic'):
     """
-    Apply Probability Calibration (Isotonic or Sigmoid/Platt).
-    Uses the validation set to fit the calibrator.
+    Manual calibration compatible with sklearn>=1.8.
+    Fits an IsotonicRegression over the model's predicted probabilities
+    and returns a pickle‑safe wrapped model.
     """
-    print("\n" + "="*40)
-    print(f"⏳ Calibrating {model_label} using {method} scaling...")
-    
-    calibrated_model = CalibratedClassifierCV(model, method=method, cv='prefit')
-    calibrated_model.fit(X_val, y_val)
-    
-    print(f"✅ Calibration ({method}) Complete.")
-    return calibrated_model
+    print("\n" + "=" * 40)
+    print(f"⏳ Calibrating {model_label} manually using {method} scaling...")
 
+    # Step 1: get raw model probabilities
+    y_prob = model.predict_proba(X_val)[:, 1]
+
+    # Step 2: fit isotonic regression
+    iso_reg = IsotonicRegression(out_of_bounds='clip')
+    iso_reg.fit(y_prob, y_val)
+
+    # Step 3: wrap and return
+    calibrated_model = CalibratedModelWrapper(model, iso_reg)
+    print(f"✅ Manual {method} calibration complete.")
+    return calibrated_model
 def plot_calibration_curve_comparison(models_dict, X_val, y_val):
     """
     Plot calibration curves for multiple models to compare.
@@ -322,6 +358,7 @@ def save_model_info(model, metrics, algorithm_name, version, feature_names):
         'created_by': CREATED_BY,
         'metrics_val': metrics,
         'feature_count': len(feature_names),
+        'features': list(feature_names),
         'model_path': str(model_filename)
     }
     metadata['target_hit_versions'] = [v for v in metadata['target_hit_versions'] if v['version'] != version]
@@ -355,12 +392,12 @@ def main():
         # Validation Performance
         lr_metrics = evaluate_model(lr, X_val, y_val, "Logistic Regression (v1.2)")
 
-        save_model_info(lr, lr_metrics, "Logistic Regression", "1.2_balanced15", X_train.columns)
+        save_model_info(lr, lr_metrics, "Logistic Regression", "1.2.2_balanced15", X_train.columns)
 
         # 2️. XGBoost
         xgb = train_xgboost(X_train, y_train)
         xgb_metrics = evaluate_model(xgb, X_val, y_val, "XGBoost (v1.1)", X_train, y_train)
-        save_model_info(xgb, xgb_metrics, "XGBoost", "1.1_balanced15", X_train.columns)
+        save_model_info(xgb, xgb_metrics, "XGBoost", "1.1.2_balanced15", X_train.columns)
 
         # Train Performance
         y_pred_train = xgb.predict(X_train)
@@ -371,7 +408,7 @@ def main():
         # Validation Performance
         xgb_metrics = evaluate_model(xgb, X_val, y_val, " XGBoost (v1.2)")
 
-        save_model_info(xgb, xgb_metrics, " XGBoost", "1.2_balanced15", X_train.columns)
+        save_model_info(xgb, xgb_metrics, " XGBoost", "1.2.2_balanced15", X_train.columns)
 
         # 3️. Random Forest
         rf = train_random_forest(X_train, y_train)
@@ -385,7 +422,7 @@ def main():
         # Validation Performance
         rf_metrics = evaluate_model(rf, X_val, y_val, "Random Forest (v1.2)")
 
-        save_model_info(rf, rf_metrics, "Random Forest", "1.2_balanced15", X_train.columns)
+        save_model_info(rf, rf_metrics, "Random Forest", "1.2.2_balanced15", X_train.columns)
 
         # 4️. LightGBM (tuned)
         lgb = train_lightgbm(X_train, y_train)
@@ -399,7 +436,7 @@ def main():
         # Validation Performance
         lgb_metrics = evaluate_model(lgb, X_val, y_val, "LightGBM (v1.4)")
 
-        save_model_info(lgb, lgb_metrics, "LightGBM", "1.4_balanced15", X_train.columns)
+        save_model_info(lgb, lgb_metrics, "LightGBM", "1.4.2_balanced15", X_train.columns)
 
         print("\n" + "="*40)
         print("🏁 COMPARISON SUMMARY (Best F1):")
