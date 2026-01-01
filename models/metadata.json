@@ -1,18 +1,18 @@
 {
     "target_hit_model": {
-        "version": "1.1",
-        "algorithm": "XGBoost",
-        "trained_at": "2026-01-01 05:48:53",
+        "version": "1.4",
+        "algorithm": "LightGBM",
+        "trained_at": "2026-01-01 16:31:22",
         "created_by": "Hana Alaa",
         "metrics_val": {
-            "accuracy": 0.9916492693110647,
-            "precision": 0.5454545454545454,
-            "recall": 0.24,
-            "f1_score": 0.3333333333333333,
-            "roc_auc": 0.9369296244296245
+            "accuracy": 0.9932150313152401,
+            "precision": 0.7619047619047619,
+            "recall": 0.32,
+            "f1_score": 0.4507042253521127,
+            "roc_auc": 0.9303896103896104
         },
-        "feature_count": 48,
-        "model_path": "model_target_hit_v1.1.pkl"
+        "feature_count": 36,
+        "model_path": "model_target_hit_v1.4.pkl"
     },
     "stop_hit_model": {
         "version": "v1.0",
@@ -80,34 +80,79 @@
     },
     "target_hit_versions": [
         {
-            "version": "1.0",
-            "algorithm": "Logistic Regression",
-            "trained_at": "2026-01-01 05:48:48",
+            "version": "1.3",
+            "algorithm": "LightGBM",
+            "trained_at": "2026-01-01 15:48:07",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.8218510786360473,
-                "precision": 0.010552763819095477,
-                "recall": 0.21,
-                "f1_score": 0.020095693779904306,
-                "roc_auc": 0.5193181818181818
+                "accuracy": 0.9946938065414057,
+                "precision": 0.6857142857142857,
+                "recall": 0.72,
+                "f1_score": 0.7024390243902439,
+                "roc_auc": 0.9842514917514918
             },
-            "feature_count": 48,
+            "feature_count": 36,
+            "model_path": "model_target_hit_v1.3.pkl"
+        },
+        {
+            "version": "1.0",
+            "algorithm": "Logistic Regression",
+            "trained_at": "2026-01-01 15:53:15",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9846033402922756,
+                "precision": 0.024691358024691357,
+                "recall": 0.02,
+                "f1_score": 0.022099447513812154,
+                "roc_auc": 0.5477781677781679
+            },
+            "feature_count": 36,
             "model_path": "model_target_hit_v1.0.pkl"
         },
         {
             "version": "1.1",
             "algorithm": "XGBoost",
-            "trained_at": "2026-01-01 05:48:53",
+            "trained_at": "2026-01-01 16:29:28",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9916492693110647,
-                "precision": 0.5454545454545454,
-                "recall": 0.24,
-                "f1_score": 0.3333333333333333,
-                "roc_auc": 0.9369296244296245
+                "accuracy": 0.9929540709812108,
+                "precision": 0.7435897435897436,
+                "recall": 0.29,
+                "f1_score": 0.4172661870503597,
+                "roc_auc": 0.8146051246051247
             },
-            "feature_count": 48,
+            "feature_count": 36,
             "model_path": "model_target_hit_v1.1.pkl"
+        },
+        {
+            "version": "1.2",
+            "algorithm": "Random Forest",
+            "trained_at": "2026-01-01 16:29:55",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9930410577592206,
+                "precision": 1.0,
+                "recall": 0.2,
+                "f1_score": 0.3333333333333333,
+                "roc_auc": 0.8926860301860301
+            },
+            "feature_count": 36,
+            "model_path": "model_target_hit_v1.2.pkl"
+        },
+        {
+            "version": "1.4",
+            "algorithm": "LightGBM",
+            "trained_at": "2026-01-01 16:31:22",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9932150313152401,
+                "precision": 0.7619047619047619,
+                "recall": 0.32,
+                "f1_score": 0.4507042253521127,
+                "roc_auc": 0.9303896103896104
+            },
+            "feature_count": 36,
+            "model_path": "model_target_hit_v1.4.pkl"
         }
     ]
 }

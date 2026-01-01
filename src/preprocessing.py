@@ -49,30 +49,38 @@ def clean_numerical_residues(df):
     print(f"🔹 Shape after this step: {df.shape}")
     return df
 
-# def perform_time_based_split(df):
-#     """
-#     Step 4.4: Time-Based Split (70/15/15)
-#     - Sequential split (NO shuffling)
-#     """
-#     print("⏳ Performing Time-Based Split...")
-    
-#     # Sort by time just in case, though it should be chronological
-#     if 'created_at' in df.columns:
-#         df = df.sort_values('created_at').reset_index(drop=True)
-    
-#     n = len(df)
-#     train_end = int(n * 0.70)
-#     valid_end = int(n * 0.85)
-    
-#     train = df.iloc[:train_end].copy()
-#     valid = df.iloc[train_end:valid_end].copy()
-#     test = df.iloc[valid_end:].copy()
-    
-#     # Assertion to ensure no data loss
-#     assert len(train) + len(valid) + len(test) == len(df), "❌ Split size mismatch!"
-    
-#     print(f"✅ Split Ratios: Train={len(train)/n:.1%}, Valid={len(valid)/n:.1%}, Test={len(test)/n:.1%}")
-#     return train, valid, test
+def balance_dataset(df, target_col="target_hit", ratio=2.5):
+    """
+    Step 4.0: Balance dataset before splitting.
+    - Keeps all minority samples (class 1)
+    - Downsamples majority class (class 0) to maintain ~1:ratio proportion.
+    """
+    print("\n⚖️ Balancing dataset before time-based split...")
+
+    if target_col not in df.columns:
+        raise ValueError(f"❌ Target column '{target_col}' not found in dataframe!")
+
+    # Separate majority and minority classes
+    minority = df[df[target_col] == 1]
+    majority = df[df[target_col] == 0]
+
+    print(f"📊 Original distribution: 0={len(majority)}, 1={len(minority)}, ratio={(len(majority) / len(minority)):.2f}:1")
+
+    # Downsample majority class to maintain target ratio
+    desired_majority = int(len(minority) * ratio)
+    majority_downsampled = majority.sample(
+        n=min(desired_majority, len(majority)),  # avoids sampling beyond available rows
+        random_state=42
+    )
+
+    balanced_df = pd.concat([minority, majority_downsampled]).sample(frac=1, random_state=42).reset_index(drop=True)
+
+    print(f"✅ Balanced dataset: 0={len(majority_downsampled)}, 1={len(minority)}, "
+          f"ratio≈{(len(majority_downsampled)/len(minority)):.2f}:1")
+    print(f"🔹 Shape after balancing: {balanced_df.shape}")
+    print(df["target_hit"].value_counts(normalize=True).rename("percent").to_frame()*100)
+
+    return balanced_df
 
 def perform_time_based_split(df):
     """
@@ -252,6 +260,39 @@ def check_data_drift(train, test):
     print(drift_df[['feature', 'drift_score_std_devs', 'drift_intensity_pct']].head(5))
     print(f"✅ Drift report saved to: {report_path}")
 
+def drop_irrelevant_and_leakage_cols(df, target_col='target_hit'):
+    """
+    Drop columns that shouldn't be used as input features:
+    - IDs, metadata
+    - opposite targets (leakage)
+    - time-based leakage columns
+    - purely descriptive identifiers
+    """
+    print(f"🧹 Dropping irrelevant & leakage columns for target: {target_col}")
+
+    # columns we usually never need
+    to_drop = [
+        'id', 'coin', 'status',
+        'target_type', 'hit_first',
+        'time_to_event',
+        'TP1','TP5','TP7','TP9','TP10','TP12','TP14','TP16','TP18','TP20','TP25','TP45',
+        '1h','1day','3day'
+    ]
+
+    # Add the "opposite target" to drop
+    if target_col == 'target_hit' and 'stop_hit' in df.columns:
+        to_drop.append('stop_hit')
+    elif target_col == 'stop_hit' and 'target_hit' in df.columns:
+        to_drop.append('target_hit')
+
+    # drop columns if they exist
+    drop_existing = [c for c in to_drop if c in df.columns]
+    df = df.drop(columns=drop_existing, errors='ignore')
+
+    print(f"✅ Dropped {len(drop_existing)} columns: {drop_existing[:8]}{'...' if len(drop_existing)>8 else ''}")
+    print(f"Remaining columns: {len(df.columns)}")
+    return df
+
 def main():
     """
     Phase 4: Data Preprocessing & Splitting
@@ -266,18 +307,29 @@ def main():
     try:
         # 1. Load
         df = load_data()
-        
-        # 2. Clean
+
+        # 2. Drop leakage & unrelated columns (auto detects based on target)
+        df = drop_irrelevant_and_leakage_cols(df, target_col='target_hit')
+
+        # 3. Clean numerical residues
         df = clean_numerical_residues(df)
+        
+        # 3.1 Balance data BEFORE splitting
+        df = balance_dataset(df, target_col="target_hit", ratio=2.5)
         
         # Save pre-split full data for reference
         full_path = PROCESSED_DATA_DIR / "step4_preprocessed_full.csv"
         df.to_csv(full_path, index=False)
-        print(f"💾 Saved full preprocessed (cleaned) data to: {full_path}")
+        print(f"💾 Saved full preprocessed (cleaned & balanced) data to: {full_path}")
         
-        # 3. Split (BEFORE Clipping/Scaling)
+        # 4. Time-based split
         train, valid, test = perform_time_based_split(df)
         
+        for split_name, split_df in zip(["train", "valid", "test"], [train, valid, test]):
+            if "created_at" in split_df.columns:
+                split_df.drop(columns=["created_at"], inplace=True)
+                print(f"🗑️ Dropped 'created_at' from {split_name} split.")
+
         # 4. Clip (New Position: After Split, Fit on Train)
         train, valid, test = clip_outliers(train, valid, test)
         
