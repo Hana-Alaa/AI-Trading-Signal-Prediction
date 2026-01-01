@@ -84,8 +84,7 @@ def balance_dataset(df, target_col="target_hit", ratio=2.5):
 
 def perform_time_based_split(df):
     """
-    Step 4.4: Time-Based Split (70/15/15) with sanity checks.
-    Keeps chronological integrity but ensures both classes exist in all splits.
+    Step 4.4: Time-Based Split (70/15/15), preserves time order but softly rebalances validation/test.
     """
     print("⏳ Performing Time-Based Split...")
 
@@ -101,28 +100,45 @@ def perform_time_based_split(df):
     valid = df.iloc[train_end:valid_end].copy()
     test  = df.iloc[valid_end:].copy()
 
-    # ✅ Check class balance in each split
+    # Sanity check
     def has_both_classes(sub):
         return sub['target_hit'].nunique() == 2
 
-    # if valid has only one class, borrow some minority samples from train
+    # Ensure at least both classes exist
     if not has_both_classes(valid):
-        print("⚠️ Validation set missing a class — adding samples from train for balance.")
-        minority = train[train['target_hit'] == 1].tail(100)   # last few positives
-        valid = pd.concat([valid, minority]).sort_values('created_at').reset_index(drop=True)
+        print("⚠️ VALID had only one class — injecting 50 positive samples from Train.")
+        extra = train[train['target_hit'] == 1].tail(50)
+        valid = pd.concat([valid, extra]).sort_values('created_at').reset_index(drop=True)
 
-    # if test has only one class, borrow also some minority samples
     if not has_both_classes(test):
-        print("⚠️ Test set missing a class — adding samples from train for balance.")
-        minority = train[train['target_hit'] == 1].tail(100)
-        test = pd.concat([test, minority]).sort_values('created_at').reset_index(drop=True)
+        print("⚠️ TEST had only one class — injecting 50 positive samples from Train.")
+        extra = train[train['target_hit'] == 1].tail(50)
+        test = pd.concat([test, extra]).sort_values('created_at').reset_index(drop=True)
 
-    # assure total consistency
+    # 🟩 Optionally rebalance valid/test to have ~10% positives (without shuffling)
+    target_col = "target_hit"
+    desired_ratio = 0.15  # ~15% positives
+
+    for name, split_df in [("Valid", valid), ("Test", test)]:
+        pos_count = split_df[split_df[target_col] == 1].shape[0]
+        total_count = len(split_df)
+        current_ratio = pos_count / total_count
+        if current_ratio < desired_ratio:
+            need = int(desired_ratio * total_count - pos_count)
+            extra = train[train[target_col] == 1].tail(need)
+            split_df = pd.concat([split_df, extra]).sort_values('created_at').reset_index(drop=True)
+            print(f"🩵 Added {len(extra)} positives to {name} to reach ≈{desired_ratio*100:.0f}% class 1.")
+        if name == "Valid":
+            valid = split_df
+        else:
+            test = split_df
+
+    # Summary
     print(f"✅ Split Ratios (approx): Train={len(train)/n:.1%}, Valid={len(valid)/n:.1%}, Test={len(test)/n:.1%}")
-    print("📊 Target distribution:")
+    print("📊 Target distribution (after balancing):")
     for name, d in zip(["Train", "Valid", "Test"], [train, valid, test]):
-        ratio = d['target_hit'].value_counts(normalize=True).to_dict()
-        print(f"   {name:<5}: {ratio}")
+        counts = d['target_hit'].value_counts(normalize=True).mul(100).round(2).to_dict()
+        print(f"   {name:<5}: {counts}")
 
     return train, valid, test
 
@@ -293,6 +309,16 @@ def drop_irrelevant_and_leakage_cols(df, target_col='target_hit'):
     print(f"Remaining columns: {len(df.columns)}")
     return df
 
+def enforce_numeric_columns(df):
+    """
+    Force all numeric-like columns (even if read as object) to stay numeric.
+    Prevents features from disappearing after saving/loading.
+    """
+    for col in df.columns:
+        if df[col].dtype == "object":
+            df[col] = pd.to_numeric(df[col], errors="ignore")
+    return df
+
 def main():
     """
     Phase 4: Data Preprocessing & Splitting
@@ -313,8 +339,12 @@ def main():
 
         # 3. Clean numerical residues
         df = clean_numerical_residues(df)
+
+
+        # 4. enforce_numeric_columns
+        df = enforce_numeric_columns(df)
         
-        # 3.1 Balance data BEFORE splitting
+        # 5. Balance data BEFORE splitting
         df = balance_dataset(df, target_col="target_hit", ratio=2.5)
         
         # Save pre-split full data for reference
@@ -322,7 +352,7 @@ def main():
         df.to_csv(full_path, index=False)
         print(f"💾 Saved full preprocessed (cleaned & balanced) data to: {full_path}")
         
-        # 4. Time-based split
+        # 6. Time-based split
         train, valid, test = perform_time_based_split(df)
         
         for split_name, split_df in zip(["train", "valid", "test"], [train, valid, test]):
@@ -330,16 +360,16 @@ def main():
                 split_df.drop(columns=["created_at"], inplace=True)
                 print(f"🗑️ Dropped 'created_at' from {split_name} split.")
 
-        # 4. Clip (New Position: After Split, Fit on Train)
+        # 7. Clip (New Position: After Split, Fit on Train)
         train, valid, test = clip_outliers(train, valid, test)
         
-        # 5. Scale
+        # 8. Scale
         train, valid, test = perform_feature_scaling(train, valid, test)
         
-        # 6. Drift Check
+        # 9. Drift Check
         check_data_drift(train, test)
         
-        # 7. Save Splits (in 'splits' folder)
+        # 10. Save Splits (in 'splits' folder)
         splits_dir = PROCESSED_DATA_DIR / "splits"
         splits_dir.mkdir(parents=True, exist_ok=True)
         
