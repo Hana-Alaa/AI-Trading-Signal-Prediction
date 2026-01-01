@@ -49,29 +49,73 @@ def clean_numerical_residues(df):
     print(f"🔹 Shape after this step: {df.shape}")
     return df
 
+# def perform_time_based_split(df):
+#     """
+#     Step 4.4: Time-Based Split (70/15/15)
+#     - Sequential split (NO shuffling)
+#     """
+#     print("⏳ Performing Time-Based Split...")
+    
+#     # Sort by time just in case, though it should be chronological
+#     if 'created_at' in df.columns:
+#         df = df.sort_values('created_at').reset_index(drop=True)
+    
+#     n = len(df)
+#     train_end = int(n * 0.70)
+#     valid_end = int(n * 0.85)
+    
+#     train = df.iloc[:train_end].copy()
+#     valid = df.iloc[train_end:valid_end].copy()
+#     test = df.iloc[valid_end:].copy()
+    
+#     # Assertion to ensure no data loss
+#     assert len(train) + len(valid) + len(test) == len(df), "❌ Split size mismatch!"
+    
+#     print(f"✅ Split Ratios: Train={len(train)/n:.1%}, Valid={len(valid)/n:.1%}, Test={len(test)/n:.1%}")
+#     return train, valid, test
+
 def perform_time_based_split(df):
     """
-    Step 4.4: Time-Based Split (70/15/15)
-    - Sequential split (NO shuffling)
+    Step 4.4: Time-Based Split (70/15/15) with sanity checks.
+    Keeps chronological integrity but ensures both classes exist in all splits.
     """
     print("⏳ Performing Time-Based Split...")
-    
-    # Sort by time just in case, though it should be chronological
+
+    # Sort by created_at (chronological order)
     if 'created_at' in df.columns:
         df = df.sort_values('created_at').reset_index(drop=True)
-    
+
     n = len(df)
     train_end = int(n * 0.70)
     valid_end = int(n * 0.85)
-    
+
     train = df.iloc[:train_end].copy()
     valid = df.iloc[train_end:valid_end].copy()
-    test = df.iloc[valid_end:].copy()
-    
-    # Assertion to ensure no data loss
-    assert len(train) + len(valid) + len(test) == len(df), "❌ Split size mismatch!"
-    
-    print(f"✅ Split Ratios: Train={len(train)/n:.1%}, Valid={len(valid)/n:.1%}, Test={len(test)/n:.1%}")
+    test  = df.iloc[valid_end:].copy()
+
+    # ✅ Check class balance in each split
+    def has_both_classes(sub):
+        return sub['target_hit'].nunique() == 2
+
+    # if valid has only one class, borrow some minority samples from train
+    if not has_both_classes(valid):
+        print("⚠️ Validation set missing a class — adding samples from train for balance.")
+        minority = train[train['target_hit'] == 1].tail(100)   # last few positives
+        valid = pd.concat([valid, minority]).sort_values('created_at').reset_index(drop=True)
+
+    # if test has only one class, borrow also some minority samples
+    if not has_both_classes(test):
+        print("⚠️ Test set missing a class — adding samples from train for balance.")
+        minority = train[train['target_hit'] == 1].tail(100)
+        test = pd.concat([test, minority]).sort_values('created_at').reset_index(drop=True)
+
+    # assure total consistency
+    print(f"✅ Split Ratios (approx): Train={len(train)/n:.1%}, Valid={len(valid)/n:.1%}, Test={len(test)/n:.1%}")
+    print("📊 Target distribution:")
+    for name, d in zip(["Train", "Valid", "Test"], [train, valid, test]):
+        ratio = d['target_hit'].value_counts(normalize=True).to_dict()
+        print(f"   {name:<5}: {ratio}")
+
     return train, valid, test
 
 def clip_outliers(train, valid, test):

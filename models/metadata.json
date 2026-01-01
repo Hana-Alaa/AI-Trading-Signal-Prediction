@@ -1,0 +1,113 @@
+{
+    "target_hit_model": {
+        "version": "1.1",
+        "algorithm": "XGBoost",
+        "trained_at": "2026-01-01 05:48:53",
+        "created_by": "Hana Alaa",
+        "metrics_val": {
+            "accuracy": 0.9916492693110647,
+            "precision": 0.5454545454545454,
+            "recall": 0.24,
+            "f1_score": 0.3333333333333333,
+            "roc_auc": 0.9369296244296245
+        },
+        "feature_count": 48,
+        "model_path": "model_target_hit_v1.1.pkl"
+    },
+    "stop_hit_model": {
+        "version": "v1.0",
+        "algorithm": "Logistic Regression (Baseline)",
+        "trained_at": "2026-01-01 05:32:48",
+        "created_by": "Hana Alaa",
+        "metrics_val": {
+            "accuracy": 0.997651356993737,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "roc_auc": NaN
+        },
+        "feature_count": 48,
+        "features": [
+            "TP5",
+            "TP7",
+            "TP9",
+            "TP10",
+            "TP12",
+            "TP14",
+            "TP16",
+            "TP18",
+            "TP20",
+            "TP25",
+            "TP45",
+            "close",
+            "volume",
+            "RSI",
+            "sl3",
+            "sl5",
+            "sl10",
+            "price_3day_before_close",
+            "rsi_1d",
+            "rsi_3d",
+            "ema21",
+            "time_to_event",
+            "candle_body",
+            "upper_wick",
+            "candle_range",
+            "wick_ratio",
+            "ratio_close_open",
+            "ratio_high_low",
+            "ratio_close_high",
+            "rolling_mean_7",
+            "z_score_7",
+            "rolling_mean_14",
+            "z_score_14",
+            "rolling_mean_50",
+            "z_score_50",
+            "bb_middle",
+            "bb_width",
+            "bb_pct_b",
+            "atr_pct",
+            "rsi_slope",
+            "rsi_slope_3",
+            "macd",
+            "macd_signal",
+            "macd_hist",
+            "roc_7",
+            "roc_14",
+            "rsi_x_vol",
+            "macd_x_vol"
+        ]
+    },
+    "target_hit_versions": [
+        {
+            "version": "1.0",
+            "algorithm": "Logistic Regression",
+            "trained_at": "2026-01-01 05:48:48",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.8218510786360473,
+                "precision": 0.010552763819095477,
+                "recall": 0.21,
+                "f1_score": 0.020095693779904306,
+                "roc_auc": 0.5193181818181818
+            },
+            "feature_count": 48,
+            "model_path": "model_target_hit_v1.0.pkl"
+        },
+        {
+            "version": "1.1",
+            "algorithm": "XGBoost",
+            "trained_at": "2026-01-01 05:48:53",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9916492693110647,
+                "precision": 0.5454545454545454,
+                "recall": 0.24,
+                "f1_score": 0.3333333333333333,
+                "roc_auc": 0.9369296244296245
+            },
+            "feature_count": 48,
+            "model_path": "model_target_hit_v1.1.pkl"
+        }
+    ]
+}
