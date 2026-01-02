@@ -176,9 +176,18 @@ def perform_feature_selection(df, target_col='target_hit', threshold=0.95):
     print(f"🔥 Dropped {len(final_drop_list)} redundant features.")
     return df_reduced
 
+# 1. Add this list to the beginning of the file (after imports)
+PRODUCTION_READY_FEATURES = [
+    'close', 'open', 'high', 'low', 'volume', 
+    'RSI', 'rsi_1d', 'rsi_3d', 'atr_1h', 'time_bin',
+    'candle_body', 'upper_wick', 'candle_range', 'wick_ratio',
+    'ratio_close_open', 'ratio_high_low', 'ratio_close_high', 'price_move_ratio'
+]
+
+# 2. Replace the main() function with this version:
 def main():
     """
-    Main execution pipeline.
+    Main execution pipeline with Production Filter.
     """
     try:
         # 1. Load Data
@@ -186,32 +195,82 @@ def main():
         if not input_path.exists():
              raise FileNotFoundError(f"Input file not found: {input_path}")
              
-        print(f"📂 Loading data from {input_path}...")
+        print(f"Loading data from {input_path}...")
         df = pd.read_csv(input_path)
         
-        # 2. Feature Engineering Pipeline
+        # 2. Feature Engineering Pipeline (Calculate everything first)
         df = calculate_price_action_features(df)
         df = calculate_volatility_features(df)
         df = calculate_momentum_features(df)
         
-        # 3. Feature Selection
+        # 3. Feature Selection (Filtering based on correlation)
         df = perform_feature_selection(df)
         
+        # ---------------------------------------------------------
+        # New Step: Production Filter
+        # ---------------------------------------------------------
+        print("Applying Production Filter (keeping only API-compatible features)...")
+        
+        # Identify features that actually exist in the production list + targets
+        keep_cols = [c for c in df.columns if c in PRODUCTION_READY_FEATURES or c == 'created_at']
+        
+        # Add target columns if they exist to prevent training failure
+        targets = ['target_hit', 'stop_hit', 'target_type', 'hit_first']
+        keep_cols += [t for t in targets if t in df.columns]
+        
+        # Filter the DataFrame
+        df = df[keep_cols]
+        # ---------------------------------------------------------
+
         # 4. Summary Stats
-        print("\n📊 Final Feature Summary:")
-        print(f"Price Action:  {len([c for c in df.columns if 'candle' in c or 'ratio_' in c or 'wick' in c])}")
-        print(f"Volatility:    {len([c for c in df.columns if 'rolling_' in c or 'bb_' in c or 'atr' in c or 'z_score' in c])}")
-        print(f"Momentum:      {len([c for c in df.columns if 'rsi' in c or 'macd' in c or 'roc_' in c])}")
-        print(f"Total Columns: {len(df.columns)}")
+        print("\n📊 Final Production Feature Summary:")
+        print(f"Total Columns kept: {len(df.columns)}")
+        print(f"Features list: {list(df.columns)}")
         
         # 5. Save
         output_path = PROCESSED_DATA_DIR / "step3_features_engineered.csv"
         df.to_csv(output_path, index=False)
-        print(f"\n💾 Saved engineered data to: {output_path}")
+        print(f"\n💾 Saved production-ready data to: {output_path}")
         
     except Exception as e:
         print(f"❌ Error in feature engineering pipeline: {e}")
-        # raise e # Optional: Raise if you want stack trace
+
+# def main():
+#     """
+#     Main execution pipeline.
+#     """
+#     try:
+#         # 1. Load Data
+#         input_path = PROCESSED_DATA_DIR / "step1_quality_checked.csv"
+#         if not input_path.exists():
+#              raise FileNotFoundError(f"Input file not found: {input_path}")
+             
+#         print(f"📂 Loading data from {input_path}...")
+#         df = pd.read_csv(input_path)
+        
+#         # 2. Feature Engineering Pipeline
+#         df = calculate_price_action_features(df)
+#         df = calculate_volatility_features(df)
+#         df = calculate_momentum_features(df)
+        
+#         # 3. Feature Selection
+#         df = perform_feature_selection(df)
+        
+#         # 4. Summary Stats
+#         print("\n📊 Final Feature Summary:")
+#         print(f"Price Action:  {len([c for c in df.columns if 'candle' in c or 'ratio_' in c or 'wick' in c])}")
+#         print(f"Volatility:    {len([c for c in df.columns if 'rolling_' in c or 'bb_' in c or 'atr' in c or 'z_score' in c])}")
+#         print(f"Momentum:      {len([c for c in df.columns if 'rsi' in c or 'macd' in c or 'roc_' in c])}")
+#         print(f"Total Columns: {len(df.columns)}")
+        
+#         # 5. Save
+#         output_path = PROCESSED_DATA_DIR / "step3_features_engineered.csv"
+#         df.to_csv(output_path, index=False)
+#         print(f"\n💾 Saved engineered data to: {output_path}")
+        
+#     except Exception as e:
+#         print(f"❌ Error in feature engineering pipeline: {e}")
+#         # raise e # Optional: Raise if you want stack trace
 
 if __name__ == "__main__":
     main()

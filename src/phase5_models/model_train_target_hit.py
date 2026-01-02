@@ -89,28 +89,27 @@ def train_random_forest(X_train, y_train):
     print("✅ Random Forest Training Complete.")
     return rf
 
-# def train_lightgbm(X_train, y_train):
-#     """Train LightGBM model with basic tuning."""
-#     print("\n" + "="*40)
-#     print("⏳ Training LightGBM (v1.3)...")
+def train_lightgbm_basic(X_train, y_train):
+    """Train LightGBM model with basic/default hyperparameters (no tuning)."""
+    print("\n" + "="*40)
+    print("⏳ Training LightGBM (Basic v1.3)...")
 
-#     # handle imbalance
-#     count_neg = (y_train == 0).sum()
-#     count_pos = (y_train == 1).sum()
-#     scale_pos_weight = count_neg / (count_pos + 1e-9)
+    count_neg = (y_train == 0).sum()
+    count_pos = (y_train == 1).sum()
+    scale_pos_weight = count_neg / (count_pos + 1e-9)
 
-#     lgb_model = LGBMClassifier(
-#         n_estimators=400,
-#         learning_rate=0.05,
-#         num_leaves=31,
-#         subsample=0.9,
-#         colsample_bytree=0.8,
-#         scale_pos_weight=scale_pos_weight,
-#         random_state=42
-#     )
-#     lgb_model.fit(X_train, y_train)
-#     print("✅ LightGBM Training Complete.")
-#     return lgb_model
+    lgb_model = LGBMClassifier(
+        n_estimators=400,
+        learning_rate=0.05,
+        num_leaves=31,
+        subsample=0.9,
+        colsample_bytree=0.8,
+        scale_pos_weight=scale_pos_weight,
+        random_state=42
+    )
+    lgb_model.fit(X_train, y_train)
+    print("✅ LightGBM (Basic) Training Complete.")
+    return lgb_model
 
 def train_lightgbm(X_train, y_train):
     """Train LightGBM with hyperparameter tuning via RandomizedSearchCV."""
@@ -387,7 +386,7 @@ def main():
         y_pred_train = lr.predict(X_train)
         train_acc = accuracy_score(y_train, y_pred_train)
         train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\n📘 Logistic Regression Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
+        print(f"\nLogistic Regression Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
 
         # Validation Performance
         lr_metrics = evaluate_model(lr, X_val, y_val, "Logistic Regression (v1.2)")
@@ -410,21 +409,34 @@ def main():
         y_pred_train = rf.predict(X_train)
         train_acc = accuracy_score(y_train, y_pred_train)
         train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\n📘 Random Forest Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
+        print(f"\nRandom Forest Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
 
         # Validation Performance
         rf_metrics = evaluate_model(rf, X_val, y_val, "Random Forest (v1.2)")
 
         save_model_info(rf, rf_metrics, "Random Forest", "1.2.2_balanced15", X_train.columns)
 
-        # 4️. LightGBM (tuned)
+        # 4️. LightGBM – Basic
+        lgb_basic = train_lightgbm_basic(X_train, y_train)
+
+        # Performance
+        y_pred_train_basic = lgb_basic.predict(X_train)
+        train_acc_basic = accuracy_score(y_train, y_pred_train_basic)
+        train_f1_basic  = f1_score(y_train, y_pred_train_basic, zero_division=0)
+        print(f"\nLightGBM (Basic) Train Accuracy: {train_acc_basic:.4f} | Train F1: {train_f1_basic:.4f}")
+
+        lgb_basic_metrics = evaluate_model(lgb_basic, X_val, y_val, "LightGBM (Basic v1.3)")
+
+        save_model_info(lgb_basic, lgb_basic_metrics, "LightGBM Basic", "1.3_balanced15", X_train.columns)
+
+        # 5. LightGBM (tuned)
         lgb = train_lightgbm(X_train, y_train)
 
         # Train Performance
         y_pred_train = lgb.predict(X_train)
         train_acc = accuracy_score(y_train, y_pred_train)
         train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\n📘 LightGBM Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
+        print(f"\nLightGBM Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
 
         # Validation Performance
         lgb_metrics = evaluate_model(lgb, X_val, y_val, "LightGBM (v1.4)")
@@ -432,49 +444,59 @@ def main():
         save_model_info(lgb, lgb_metrics, "LightGBM", "1.4.2_balanced15", X_train.columns)
 
         print("\n" + "="*40)
-        print("🏁 COMPARISON SUMMARY (Best F1):")
+        print("COMPARISON SUMMARY (Best F1):")
         print(f"🔹 Logistic Regression: {lr_metrics['f1_score']:.4f}")
         print(f"🔹 XGBoost:             {xgb_metrics['f1_score']:.4f}")
         print(f"🔹 Random Forest:       {rf_metrics['f1_score']:.4f}")
+        print(f"🔹 LightGBM (Basic):    {lgb_basic_metrics['f1_score']:.4f}")
         print(f"🔹 LightGBM:            {lgb_metrics['f1_score']:.4f}")
         print("="*40)
 
         train_f1_lr  = f1_score(y_train, lr.predict(X_train), zero_division=0)
         train_f1_xgb = f1_score(y_train, xgb.predict(X_train), zero_division=0)
         train_f1_rf  = f1_score(y_train, rf.predict(X_train), zero_division=0)
+        train_f1_lgb_basic = f1_score(y_train, lgb_basic.predict(X_train), zero_division=0)
         train_f1_lgb = f1_score(y_train, lgb.predict(X_train), zero_division=0)
 
         summary = pd.DataFrame([
             ["Logistic Regression", train_f1_lr,  lr_metrics["f1_score"]],
             ["XGBoost",             train_f1_xgb, xgb_metrics["f1_score"]],
             ["Random Forest",       train_f1_rf,  rf_metrics["f1_score"]],
+            ["LightGBM (Basic)",    train_f1_lgb_basic, lgb_basic_metrics["f1_score"]],
             ["LightGBM",            train_f1_lgb, lgb_metrics["f1_score"]],
         ], columns=["Model", "Train_F1", "Val_F1"])
 
         summary["Gap"] = summary["Train_F1"] - summary["Val_F1"]
 
-        print("\n📊 F1 Comparison Table:")
+        print("\n F1 Comparison Table:")
         print(summary.round(4))
 
         # 5. Calibration (Probability Alignment)
-        # Note: We calibrate on X_val. Testing the calibrated model on X_val again 
+        # Note: We calibrate on X_val. Testing the calibrated model on X_val and Gap again 
         # will yield optimistic results. Final judgment must be on the Test set.
-        best_model_name = summary.loc[summary['Val_F1'].idxmax(), 'Model']
-        print(f"\n🏆 Best model for calibration: {best_model_name}")
+        stable_models = summary[summary['Gap'] <= 0.04]
+
+        if not stable_models.empty:
+            best_model_name = stable_models.loc[stable_models['Val_F1'].idxmax(), 'Model']
+        else:
+            best_model_name = summary.loc[summary['Val_F1'].idxmax(), 'Model']
+
+        print(f"\n🏆 Smart selection for calibration: {best_model_name}")
         
         best_models_map = {
             "Logistic Regression": lr,
             "XGBoost": xgb,
             "Random Forest": rf,
-            "LightGBM": lgb
+            "LightGBM (Basic)": lgb_basic,
+            "LightGBM (Tuning)": lgb
         }
         raw_best_model = best_models_map[best_model_name]
         
         calibrated_model = calibrate_best_model(raw_best_model, X_val, y_val, best_model_name, method='isotonic')
         
         # Evaluate Calibrated Model (INTERNAL REFERENCE ONLY)
-        print("\n⚠️  NOTICE: The following Validation metrics are OPTIMISTIC (calibrated on the same data).")
-        print("💡 Final unbiased performance must be measured using 'tests/test_model_performance.py' on the Test set.")
+        print("\nNOTICE: The following Validation metrics are OPTIMISTIC (calibrated on the same data).")
+        print("Final unbiased performance must be measured using 'tests/test_model_performance.py' on the Test set.")
         calib_metrics = evaluate_model(calibrated_model, X_val, y_val, f"{best_model_name} (Calibrated v1.5)")
         
         # Save Calibrated Model
@@ -483,14 +505,14 @@ def main():
         # Save explicitly as the "Final" model for easy access
         final_calibrated_path = MODELS_DIR / "model_target_hit_final_calibrated.pkl"
         joblib.dump(calibrated_model, final_calibrated_path)
-        print(f"🎯 FINAL CALIBRATED MODEL saved separately to: {final_calibrated_path}")
+        print(f"FINAL CALIBRATED MODEL saved separately to: {final_calibrated_path}")
 
         print("\n" + "="*40)
-        print("🎉 Calibration Phase Complete! Model is now ready for Test Evaluation.")
+        print("Calibration Phase Complete! Model is now ready for Test Evaluation.")
         print("="*40)
 
     except Exception as e:
-        print(f"❌ Error in training pipeline: {e}")
+        print(f"Error in training pipeline: {e}")
         traceback.print_exc()
 
 if __name__ == "__main__":

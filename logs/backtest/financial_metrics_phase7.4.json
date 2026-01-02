@@ -1,14 +1,14 @@
 {
     "initial_capital": 10000,
-    "final_equity": 3353772.106208264,
-    "net_profit": 3343772.106208288,
-    "roi_pct": 33437.721062082644,
-    "cagr_pct": 67.9603663457768,
-    "win_rate": 67.76362349610757,
-    "reward_risk_ratio": 1.6104894473326776,
-    "max_drawdown_pct": -7.70813820530681,
-    "sharpe_ratio": 18.76142581046852,
+    "final_equity": 53367003.516550094,
+    "net_profit": 53357003.516550764,
+    "roi_pct": 533570.035165501,
+    "cagr_pct": 136.2217339401881,
+    "win_rate": 90.34181240063593,
+    "reward_risk_ratio": 1.7140927100559953,
+    "max_drawdown_pct": -2.7666176364770223,
+    "sharpe_ratio": 48.1236436423291,
     "sortino_ratio": 10,
-    "total_trades": 2826,
-    "evaluated_at": "2026-01-02 04:38:34.187816"
+    "total_trades": 2516,
+    "evaluated_at": "2026-01-02 06:27:49.298110"
 }

@@ -157,51 +157,95 @@ def clip_outliers(train, valid, test):
     print(f"✅ Clipped outliers for {len(cols_to_clip)} features.")
     return train, valid, test
 
+# def perform_feature_scaling(train, valid, test):
+#     """
+#     Step 4.3: Feature Scaling (StandardScaler)
+#     - Fit on TRAIN only
+#     - Transform Train, Valid, Test
+#     - Save Scaler
+#     """
+#     print("⏳ Scaling Features (StandardScaler)...")
+    
+#     # Identify feature columns (numeric excluding targets/metadata)
+#     exclude_cols = ['id', 'status', 'target_hit', 'stop_hit', 'target_type', 'hit_first', 'created_at', 'coin']
+    
+#     # Get numeric columns that are in the dataframe AND not excluded
+#     numeric_cols = train.select_dtypes(include=[np.number]).columns.tolist()
+#     feature_cols = [c for c in numeric_cols if c not in exclude_cols]
+    
+#     if not feature_cols:
+#         print("⚠️ No features to scale!")
+#         return train, valid, test
+
+#     # Initialize Scaler
+#     scaler = StandardScaler()
+    
+#     # FIT on Train
+#     scaler.fit(train[feature_cols])
+    
+#     # TRANSFORM all
+#     train[feature_cols] = scaler.transform(train[feature_cols])
+#     valid[feature_cols] = scaler.transform(valid[feature_cols])
+#     test[feature_cols] = scaler.transform(test[feature_cols])
+    
+#     # Save Scaler
+#     MODELS_DIR.mkdir(parents=True, exist_ok=True)
+#     scaler_path = MODELS_DIR / "scaler.pkl"
+#     joblib.dump(scaler, scaler_path)
+    
+#     print(f"✅ Scaled {len(feature_cols)} features.")
+#     print(f"💾 Scaler saved to: {scaler_path}")
+    
+#     # Check for Infs after scaling (can happen if std is very small)
+#     for split_name, split_df in zip(["train", "valid", "test"], [train, valid, test]):
+#         if np.isinf(split_df.select_dtypes(include=[np.number]).values).any():
+#             print(f"⚠️ Found Inf values after scaling in {split_name}, replacing with 0.")
+#             split_df.replace([np.inf, -np.inf], 0, inplace=True)
+    
+#     return train, valid, test
+
 def perform_feature_scaling(train, valid, test):
     """
     Step 4.3: Feature Scaling (StandardScaler)
-    - Fit on TRAIN only
-    - Transform Train, Valid, Test
-    - Save Scaler
+    Fit on TRAIN only — using the same feature set that production/API will supply.
     """
-    print("⏳ Scaling Features (StandardScaler)...")
-    
-    # Identify feature columns (numeric excluding targets/metadata)
-    exclude_cols = ['id', 'status', 'target_hit', 'stop_hit', 'target_type', 'hit_first', 'created_at', 'coin']
-    
-    # Get numeric columns that are in the dataframe AND not excluded
-    numeric_cols = train.select_dtypes(include=[np.number]).columns.tolist()
-    feature_cols = [c for c in numeric_cols if c not in exclude_cols]
-    
+    print("Scaling Features (StandardScaler, production-aligned)...")
+
+    PRODUCTION_READY_FEATURES = [
+        'close', 'volume', 'RSI', 'rsi_1d', 'rsi_3d', 'atr_1h',
+        'candle_body', 'upper_wick', 'candle_range', 'wick_ratio',
+        'ratio_high_low', 'ratio_close_high'
+    ]
+
+    feature_cols = [c for c in PRODUCTION_READY_FEATURES if c in train.columns]
+
     if not feature_cols:
-        print("⚠️ No features to scale!")
+        print("No matching features found to scale!")
         return train, valid, test
 
-    # Initialize Scaler
+    # Initialize & fit
     scaler = StandardScaler()
-    
-    # FIT on Train
     scaler.fit(train[feature_cols])
-    
-    # TRANSFORM all
+
+    # Transform consistently
     train[feature_cols] = scaler.transform(train[feature_cols])
     valid[feature_cols] = scaler.transform(valid[feature_cols])
-    test[feature_cols] = scaler.transform(test[feature_cols])
-    
+    test[feature_cols]  = scaler.transform(test[feature_cols])
+
     # Save Scaler
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     scaler_path = MODELS_DIR / "scaler.pkl"
-    joblib.dump(scaler, scaler_path)
-    
-    print(f"✅ Scaled {len(feature_cols)} features.")
-    print(f"💾 Scaler saved to: {scaler_path}")
-    
-    # Check for Infs after scaling (can happen if std is very small)
-    for split_name, split_df in zip(["train", "valid", "test"], [train, valid, test]):
-        if np.isinf(split_df.select_dtypes(include=[np.number]).values).any():
-            print(f"⚠️ Found Inf values after scaling in {split_name}, replacing with 0.")
-            split_df.replace([np.inf, -np.inf], 0, inplace=True)
-    
+    joblib.dump({'scaler': scaler, 'feature_order': feature_cols}, scaler_path)
+
+    print(f"Scaled {len(feature_cols)} production features.")
+    print(f"Scaler (with column order) saved to: {scaler_path}")
+
+    # Safety — check for infs
+    for name, d in zip(["train", "valid", "test"], [train, valid, test]):
+        if np.isinf(d[feature_cols].values).any():
+            print(f"Found Inf values in {name}, replacing with 0.")
+            d[feature_cols].replace([np.inf, -np.inf], 0, inplace=True)
+
     return train, valid, test
 
 def check_data_drift(train, test):
