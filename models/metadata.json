@@ -1,18 +1,18 @@
 {
     "target_hit_model": {
         "version": "1.5_calibrated",
-        "algorithm": "LGB Basic Calibrated",
-        "trained_at": "2026-01-02 07:45:38",
+        "algorithm": "XGB Tuned Calibrated",
+        "trained_at": "2026-01-02 15:01:35",
         "created_by": "Hana Alaa",
         "metrics_val": {
-            "accuracy": 0.9089467005076142,
-            "precision": 0.9097865485300041,
-            "recall": 0.9728682170542635,
-            "f1_score": 0.940270551508845,
-            "roc_auc": 0.9414593775619273,
-            "best_threshold": 0.44999999999999996
+            "accuracy": 0.8045685279187818,
+            "precision": 0.8115412710007305,
+            "recall": 0.9569336778639104,
+            "f1_score": 0.8782608695652174,
+            "roc_auc": 0.8321173583221776,
+            "best_threshold": 0.35
         },
-        "feature_count": 13,
+        "feature_count": 12,
         "features": [
             "close",
             "volume",
@@ -25,8 +25,7 @@
             "candle_range",
             "wick_ratio",
             "ratio_high_low",
-            "ratio_close_high",
-            "time_bin"
+            "ratio_close_high"
         ],
         "model_path": "model_target_hit_v1.5_calibrated.pkl"
     },
@@ -240,17 +239,17 @@
         {
             "version": "1.5.2_balanced15",
             "algorithm": "Logistic Regression Tuned",
-            "trained_at": "2026-01-02 07:42:04",
+            "trained_at": "2026-01-02 14:59:05",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.7998096446700508,
-                "precision": 0.7959397969898495,
-                "recall": 0.979328165374677,
-                "f1_score": 0.8781618072987063,
-                "roc_auc": 0.715290619843716,
-                "best_threshold": 0.3
+                "accuracy": 0.7366751269035533,
+                "precision": 0.7366751269035533,
+                "recall": 1.0,
+                "f1_score": 0.8483741322616003,
+                "roc_auc": 0.6375164741653955,
+                "best_threshold": 0.05
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -263,25 +262,24 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.5.2_balanced15.pkl"
         },
         {
             "version": "1.7.2_balanced15",
             "algorithm": "XGBoost Basic",
-            "trained_at": "2026-01-02 07:42:40",
+            "trained_at": "2026-01-02 14:59:12",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.8991116751269036,
-                "precision": 0.8963607594936709,
-                "recall": 0.9758828596037898,
-                "f1_score": 0.9344329896907216,
-                "roc_auc": 0.9310207237217606,
+                "accuracy": 0.7966370558375635,
+                "precision": 0.8077627242768217,
+                "recall": 0.9500430663221361,
+                "f1_score": 0.8731446665347319,
+                "roc_auc": 0.8186482363562779,
                 "best_threshold": 0.3
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -294,25 +292,24 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.7.2_balanced15.pkl"
         },
         {
             "version": "1.2.2_balanced15",
             "algorithm": "Random Forest",
-            "trained_at": "2026-01-02 07:43:19",
+            "trained_at": "2026-01-02 14:59:38",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.8848350253807107,
-                "precision": 0.8739977090492554,
-                "recall": 0.9857881136950905,
-                "f1_score": 0.9265330904675168,
-                "roc_auc": 0.9062140033000219,
-                "best_threshold": 0.44999999999999996
+                "accuracy": 0.7791878172588832,
+                "precision": 0.7872791519434629,
+                "recall": 0.9595176571920758,
+                "f1_score": 0.8649068322981367,
+                "roc_auc": 0.7808282224505256,
+                "best_threshold": 0.35
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -325,25 +322,24 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.2.2_balanced15.pkl"
         },
         {
             "version": "1.6.2_balanced15",
             "algorithm": "Random Forest Tuned",
-            "trained_at": "2026-01-02 07:44:29",
+            "trained_at": "2026-01-02 15:00:40",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9130710659898477,
-                "precision": 0.9183006535947712,
-                "recall": 0.9681309216192937,
-                "f1_score": 0.9425576519916142,
-                "roc_auc": 0.9397982109315818,
-                "best_threshold": 0.5499999999999999
+                "accuracy": 0.817258883248731,
+                "precision": 0.822140221402214,
+                "recall": 0.9595176571920758,
+                "f1_score": 0.8855325914149443,
+                "roc_auc": 0.8500928779718357,
+                "best_threshold": 0.44999999999999996
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -356,25 +352,24 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.6.2_balanced15.pkl"
         },
         {
             "version": "1.3_balanced15",
             "algorithm": "LightGBM Basic",
-            "trained_at": "2026-01-02 07:44:48",
+            "trained_at": "2026-01-02 15:00:48",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9083121827411168,
-                "precision": 0.9097138250705361,
-                "recall": 0.9720068906115418,
-                "f1_score": 0.9398292733708099,
-                "roc_auc": 0.9390455880369022,
+                "accuracy": 0.8099619289340102,
+                "precision": 0.8319845857418112,
+                "recall": 0.929801894918174,
+                "f1_score": 0.8781777506609721,
+                "roc_auc": 0.8279422599960565,
                 "best_threshold": 0.35
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -387,25 +382,24 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.3_balanced15.pkl"
         },
         {
             "version": "1.4.2_balanced15",
             "algorithm": "LightGBM",
-            "trained_at": "2026-01-02 07:45:34",
+            "trained_at": "2026-01-02 15:01:31",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9086294416243654,
-                "precision": 0.9171452009844134,
-                "recall": 0.9629629629629629,
-                "f1_score": 0.9394957983193277,
-                "roc_auc": 0.9393045048410696,
-                "best_threshold": 0.39999999999999997
+                "accuracy": 0.811230964467005,
+                "precision": 0.8185171523423092,
+                "recall": 0.9556416881998278,
+                "f1_score": 0.8817802503477051,
+                "roc_auc": 0.8355234893060615,
+                "best_threshold": 0.3
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -418,25 +412,24 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.4.2_balanced15.pkl"
         },
         {
             "version": "1.5_calibrated",
-            "algorithm": "LGB Basic Calibrated",
-            "trained_at": "2026-01-02 07:45:38",
+            "algorithm": "XGB Tuned Calibrated",
+            "trained_at": "2026-01-02 15:01:35",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9089467005076142,
-                "precision": 0.9097865485300041,
-                "recall": 0.9728682170542635,
-                "f1_score": 0.940270551508845,
-                "roc_auc": 0.9414593775619273,
-                "best_threshold": 0.44999999999999996
+                "accuracy": 0.8045685279187818,
+                "precision": 0.8115412710007305,
+                "recall": 0.9569336778639104,
+                "f1_score": 0.8782608695652174,
+                "roc_auc": 0.8321173583221776,
+                "best_threshold": 0.35
             },
-            "feature_count": 13,
+            "feature_count": 12,
             "features": [
                 "close",
                 "volume",
@@ -449,24 +442,23 @@
                 "candle_range",
                 "wick_ratio",
                 "ratio_high_low",
-                "ratio_close_high",
-                "time_bin"
+                "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.5_calibrated.pkl"
         }
     ],
     "optimized_params": {
-        "threshold": 0.7,
+        "threshold": 0.5,
         "risk_fraction": 0.02,
         "reward_risk_ratio": 3.0
     },
     "realistic_backtest": {
-        "roi": 21913.530261724132,
-        "sharpe": 4.248313746714852,
-        "max_drawdown": 24.07983509407854,
-        "win_rate": 45.42253521126761,
-        "trades": 568,
-        "score": 3711.9682605853664
+        "roi": 68809.43200959945,
+        "sharpe": 4.457572977772747,
+        "max_drawdown": 23.941342315786102,
+        "win_rate": 46.094946401225116,
+        "trades": 653,
+        "score": 12297.776954360135
     },
     "simple_backtest": {
         "roi_percent": 24507.11785758478,
