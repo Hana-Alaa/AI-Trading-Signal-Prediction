@@ -97,43 +97,44 @@ Once running:
 
 
 ## Project Structure
+```bash
 AI-Trading-Signal-Prediction/
 │
-├─ data/
-│   ├─ Proessed    
-│   └─ raw  
+├─ data/                                   # Datasets
+│   ├─ processed/                          # Clean and feature-ready data
+│   └─ raw/                                # Raw market data (unprocessed)
 │
-├─ api/
-│   ├─ phase8_paper_trading_api.py    
-│   └─ api_signal_predictor.py  
+├─ api/                                    # REST API modules
+│   ├─ phase8_paper_trading_api.py         # FastAPI service (main production endpoint)
+│   └─ api_signal_predictor.py             # Auxiliary or experimental API version
 │
-├─ models/
+├─ models/                                 # Trained models & metadata
 │   ├─ model_target_hit_final_calibrated.pkl
 │   └─ metadata.json
 │
-├─ notebooks/
+├─ notebooks/                              # Research & analysis notebooks
 │   ├─ 01_data_quality_and_leakage_control.ipynb
 │   ├─ 02_EDA_and_visual_analysis.ipynb
 │   └─ shap_explanation.ipynb
 │
-├─ reports/
-│   ├─ shap_summary_beeswarm.png
-│   └─ shap_feature_importance_bar.png
-│
-├─ notebooks/
+├─ pipeline_scripts/                       # Feature engineering & modeling scripts
 │   ├─ phase3_feature_engineering.py
 │   ├─ phase4_preprocessing_stop_hit.py
 │   ├─ phase4_preprocessing_target_hit.py
-│   └─ phase5_models
+│   └─ phase5_models/
 │       ├─ model_train_stop_hit.py
 │       └─ model_train_target_hit.png
 │
-├─ config.py
-├─ requirements.txt
-├─ Dockerfile
-└─ README.md
+├─ reports/                                # Visual explainability reports & plots
+│   ├─ shap_summary_beeswarm.png
+│   └─ shap_feature_importance_bar.png
+│
+├─ config.py                               # Global paths and constants
+├─ requirements.txt                        # Python dependencies
+├─ Dockerfile                              # API containerization setup
+└─ README.md                               # Project documentation
 
-
+```
 ### Summary Statement
 Final Target_Hit Model (XGB Tuned v1.5 – Calibrated) achieved:
 
