@@ -1,12 +1,12 @@
 === AUTO-GENERATED EDA INSIGHTS ===
 
 Target Balance:
-{0: 0.795441692860055, 1: 0.20455830713994502}
+{0: 0.7046278888698988, 1: 0.2953721111301012}
 
 Top Positive Corrs:
-{'target_hit': 0.9999999999999999, 'sl3': 0.24088151436261832, 'status': 0.2321803543992706, 'TP1': 0.2174991003739556, 'sl5': 0.12839167982684777}
+{'target_hit': 1.0, 'sl3': 0.7275068866195507, 'sl5': 0.4220504755471117, 'rsi_3d': 0.41902674751954394, 'status': 0.34510570286311454}
 Top Negative Corrs:
-{'TP45': -0.09643769630214394, 'RSI': -0.27326183567701734, 'stop_hit': -0.3504774163195861, 'id': -0.4244688890173506, 'TP18': nan}
+{'TP35': -0.2181502356229904, 'TP40': -0.22981618433486145, 'RSI': -0.45948886651586957, 'id': -0.7399656493684407, 'TP18': nan}
 
 Highly Skewed Features:
-['price', 'status', 'TP5', 'TP7', 'TP9', 'TP10', 'TP12', 'TP14', 'TP16', 'TP20', 'TP25', 'TP30', 'TP35', 'TP40', 'TP45', 'TP1', 'low', 'high', 'open', 'close', 'volume', 'sl5', 'sl10', 'price_1day_before_open', 'price_1day_before_low', 'price_1day_before_high', 'price_1day_before_close', 'price_3day_before_open', 'price_3day_before_low', 'price_3day_before_high', 'price_3day_before_close', 'ema21', 'ema50', 'ema100', 'target_hit', 'time_to_event']
+['price', 'status', 'TP5', 'TP7', 'TP9', 'TP10', 'TP12', 'TP14', 'TP16', 'TP20', 'TP25', 'TP30', 'TP35', 'TP40', 'TP1', 'low', 'high', 'open', 'close', 'volume', 'sl3', 'sl5', 'sl10', 'price_1day_before_open', 'price_1day_before_low', 'price_1day_before_high', 'price_1day_before_close', 'price_3day_before_open', 'price_3day_before_low', 'price_3day_before_high', 'price_3day_before_close', 'ema21', 'ema50', 'ema100', 'stop_hit', 'time_to_event']

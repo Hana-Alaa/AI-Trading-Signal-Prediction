@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 splits_dir = Path("data/processed/splits")
-for split in ["train", "valid"]:
+for split in ["train", "valid","test"]:
     path = splits_dir / f"{split}.csv"
     if path.exists():
         df = pd.read_csv(path)

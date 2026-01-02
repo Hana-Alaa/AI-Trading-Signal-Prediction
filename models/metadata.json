@@ -1,18 +1,18 @@
 {
     "target_hit_model": {
         "version": "1.5_calibrated",
-        "algorithm": "XGBoost Calibrated",
-        "trained_at": "2026-01-01 20:28:38",
+        "algorithm": "LightGBM Calibrated",
+        "trained_at": "2026-01-02 04:03:24",
         "created_by": "Hana Alaa",
         "metrics_val": {
-            "accuracy": 0.9527055815935237,
-            "precision": 0.9077720207253887,
-            "recall": 0.7116165718927701,
-            "f1_score": 0.7978142076502732,
-            "roc_auc": 0.919795828554305,
-            "best_threshold": 0.25
+            "accuracy": 0.8006440281030445,
+            "precision": 0.6697118763176388,
+            "recall": 0.8187285223367697,
+            "f1_score": 0.7367607267104754,
+            "roc_auc": 0.8877455911660044,
+            "best_threshold": 0.35
         },
-        "feature_count": 37,
+        "feature_count": 38,
         "features": [
             "close",
             "volume",
@@ -50,7 +50,8 @@
             "roc_7",
             "roc_14",
             "rsi_x_vol",
-            "macd_x_vol"
+            "macd_x_vol",
+            "time_bin"
         ],
         "model_path": "model_target_hit_v1.5_calibrated.pkl"
     },
@@ -297,17 +298,17 @@
         {
             "version": "1.2.2_balanced15",
             "algorithm": "Random Forest",
-            "trained_at": "2026-01-01 20:27:08",
+            "trained_at": "2026-01-02 04:02:01",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9159565402641671,
-                "precision": 0.6532593619972261,
-                "recall": 0.7652315190901706,
-                "f1_score": 0.7048260381593715,
-                "roc_auc": 0.9230407875818857,
-                "best_threshold": 0.35
+                "accuracy": 0.7223360655737705,
+                "precision": 0.5641942210306822,
+                "recall": 0.813573883161512,
+                "f1_score": 0.6663148636763413,
+                "roc_auc": 0.834776971824968,
+                "best_threshold": 0.44999999999999996
             },
-            "feature_count": 37,
+            "feature_count": 38,
             "features": [
                 "close",
                 "volume",
@@ -345,24 +346,25 @@
                 "roc_7",
                 "roc_14",
                 "rsi_x_vol",
-                "macd_x_vol"
+                "macd_x_vol",
+                "time_bin"
             ],
             "model_path": "model_target_hit_v1.2.2_balanced15.pkl"
         },
         {
             "version": "1.4.2_balanced15",
             "algorithm": "LightGBM",
-            "trained_at": "2026-01-01 20:28:32",
+            "trained_at": "2026-01-02 04:03:20",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9266084363016617,
-                "precision": 0.7336206896551725,
-                "recall": 0.6913078797725426,
-                "f1_score": 0.711836051861146,
-                "roc_auc": 0.9304088816680205,
-                "best_threshold": 0.25
+                "accuracy": 0.8066451990632318,
+                "precision": 0.6886474334956912,
+                "recall": 0.7895189003436426,
+                "f1_score": 0.7356413848308986,
+                "roc_auc": 0.886001484743611,
+                "best_threshold": 0.44999999999999996
             },
-            "feature_count": 37,
+            "feature_count": 38,
             "features": [
                 "close",
                 "volume",
@@ -400,24 +402,25 @@
                 "roc_7",
                 "roc_14",
                 "rsi_x_vol",
-                "macd_x_vol"
+                "macd_x_vol",
+                "time_bin"
             ],
             "model_path": "model_target_hit_v1.4.2_balanced15.pkl"
         },
         {
             "version": "1.5_calibrated",
-            "algorithm": "XGBoost Calibrated",
-            "trained_at": "2026-01-01 20:28:38",
+            "algorithm": "LightGBM Calibrated",
+            "trained_at": "2026-01-02 04:03:24",
             "created_by": "Hana Alaa",
             "metrics_val": {
-                "accuracy": 0.9527055815935237,
-                "precision": 0.9077720207253887,
-                "recall": 0.7116165718927701,
-                "f1_score": 0.7978142076502732,
-                "roc_auc": 0.919795828554305,
-                "best_threshold": 0.25
+                "accuracy": 0.8006440281030445,
+                "precision": 0.6697118763176388,
+                "recall": 0.8187285223367697,
+                "f1_score": 0.7367607267104754,
+                "roc_auc": 0.8877455911660044,
+                "best_threshold": 0.35
             },
-            "feature_count": 37,
+            "feature_count": 38,
             "features": [
                 "close",
                 "volume",
@@ -455,7 +458,8 @@
                 "roc_7",
                 "roc_14",
                 "rsi_x_vol",
-                "macd_x_vol"
+                "macd_x_vol",
+                "time_bin"
             ],
             "model_path": "model_target_hit_v1.5_calibrated.pkl"
         }

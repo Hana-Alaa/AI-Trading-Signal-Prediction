@@ -1,0 +1,14 @@
+{
+    "initial_capital": 10000,
+    "final_equity": 3353772.106208264,
+    "net_profit": 3343772.106208288,
+    "roi_pct": 33437.721062082644,
+    "cagr_pct": 67.9603663457768,
+    "win_rate": 67.76362349610757,
+    "reward_risk_ratio": 1.6104894473326776,
+    "max_drawdown_pct": -7.70813820530681,
+    "sharpe_ratio": 18.76142581046852,
+    "sortino_ratio": 10,
+    "total_trades": 2826,
+    "evaluated_at": "2026-01-02 04:38:34.187816"
+}

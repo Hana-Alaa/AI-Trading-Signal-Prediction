@@ -1,0 +1,12 @@
+{
+    "net_profit": 291617.4,
+    "roi_pct": 2916.174,
+    "win_rate": 0.6776362349610757,
+    "reward_risk_ratio": 1.9970029970029974,
+    "max_drawdown_usd": -4004.900000000285,
+    "max_drawdown_pct": -1.323414580791042,
+    "sharpe_ratio": 39.11630531584856,
+    "sortino_ratio": 3.8580572068354195e+17,
+    "total_trades": 2826,
+    "evaluated_at": "2026-01-02 04:14:44.201081"
+}

@@ -394,21 +394,14 @@ def main():
 
         save_model_info(lr, lr_metrics, "Logistic Regression", "1.2.2_balanced15", X_train.columns)
 
-        # 2️. XGBoost
+        # 2. XGBoost (v1.2.2)
         xgb = train_xgboost(X_train, y_train)
-        xgb_metrics = evaluate_model(xgb, X_val, y_val, "XGBoost (v1.1)", X_train, y_train)
-        save_model_info(xgb, xgb_metrics, "XGBoost", "1.1.2_balanced15", X_train.columns)
-
-        # Train Performance
-        y_pred_train = xgb.predict(X_train)
-        train_acc = accuracy_score(y_train, y_pred_train)
-        train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\n📘 XGBoost Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
-
+        
         # Validation Performance
-        xgb_metrics = evaluate_model(xgb, X_val, y_val, " XGBoost (v1.2)")
-
-        save_model_info(xgb, xgb_metrics, " XGBoost", "1.2.2_balanced15", X_train.columns)
+        xgb_metrics = evaluate_model(xgb, X_val, y_val, "XGBoost (v1.2.2)", X_train, y_train)
+        
+        # Save Model Info
+        save_model_info(xgb, xgb_metrics, "XGBoost", "1.2.2_balanced15", feature_list)
 
         # 3️. Random Forest
         rf = train_random_forest(X_train, y_train)
@@ -463,8 +456,9 @@ def main():
         print("\n📊 F1 Comparison Table:")
         print(summary.round(4))
 
-        # 5️. Calibration (User Recommended)
-        # Choosing the best model based on Val_F1 for calibration
+        # 5. Calibration (Probability Alignment)
+        # Note: We calibrate on X_val. Testing the calibrated model on X_val again 
+        # will yield optimistic results. Final judgment must be on the Test set.
         best_model_name = summary.loc[summary['Val_F1'].idxmax(), 'Model']
         print(f"\n🏆 Best model for calibration: {best_model_name}")
         
@@ -476,10 +470,11 @@ def main():
         }
         raw_best_model = best_models_map[best_model_name]
         
-        # We use Isotonic as default (better if N > 1000)
         calibrated_model = calibrate_best_model(raw_best_model, X_val, y_val, best_model_name, method='isotonic')
         
-        # Evaluate Calibrated Model
+        # Evaluate Calibrated Model (INTERNAL REFERENCE ONLY)
+        print("\n⚠️  NOTICE: The following Validation metrics are OPTIMISTIC (calibrated on the same data).")
+        print("💡 Final unbiased performance must be measured using 'tests/test_model_performance.py' on the Test set.")
         calib_metrics = evaluate_model(calibrated_model, X_val, y_val, f"{best_model_name} (Calibrated v1.5)")
         
         # Save Calibrated Model
