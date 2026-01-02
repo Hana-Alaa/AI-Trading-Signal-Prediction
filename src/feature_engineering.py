@@ -120,6 +120,10 @@ def calculate_momentum_features(df):
     df['rsi_x_vol'] = df['RSI'] * df['bb_width']
     df['macd_x_vol'] = df['macd_hist'] * df['atr_pct']
     
+    # RSI momentum between current RSI and 3-day RSI
+    if 'rsi_3d' in df.columns:
+        df['rsi_momentum'] = df['RSI'] - df['rsi_3d']
+
     # Drop NaNs created by diff/pct_change
     df.dropna(subset=['rsi_slope', 'macd_hist', 'roc_14'], inplace=True)
     
@@ -223,17 +227,19 @@ def main():
         # ---------------------------------------------------------
 
         # 4. Summary Stats
-        print("\n📊 Final Production Feature Summary:")
+        print("\nFinal Production Feature Summary:")
         print(f"Total Columns kept: {len(df.columns)}")
         print(f"Features list: {list(df.columns)}")
         
         # 5. Save
         output_path = PROCESSED_DATA_DIR / "step3_features_engineered.csv"
         df.to_csv(output_path, index=False)
-        print(f"\n💾 Saved production-ready data to: {output_path}")
+        print(f"\nSaved production-ready data to: {output_path}")
+        print("Engineered Columns:", list(df.columns))
         
     except Exception as e:
         print(f"❌ Error in feature engineering pipeline: {e}")
+
 
 # def main():
 #     """

@@ -1,65 +1,64 @@
-# api_signal_predictor.py
+# ==============================================================
+# PHASE 9 – FastAPI REST API for Trading Signal Prediction
+# ==============================================================
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-import pandas as pd, joblib, json
+import pandas as pd
+import numpy as np
+from datetime import datetime
 from pathlib import Path
+import sys, warnings, joblib, json
+
+# --- Setup ---
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))
 from config import MODELS_DIR
+from api.phase8_paper_trading_api import (
+    generate_signal,
+    load_model_and_params
+)
 
-# ----------------------------------------------------------
-# ✅ أضفي تعريف نفس الـ Wrapper هنا قبل تحميل النموذج
-# ----------------------------------------------------------
-class CalibratedModelWrapper:
-    def __init__(self, base_model, iso_model):
-        self.base_model = base_model
-        self.iso_model = iso_model
-    def predict_proba(self, X):
-        import numpy as np
-        base_probs = self.base_model.predict_proba(X)[:, 1]
-        calibrated_probs = self.iso_model.predict(base_probs)
-        return np.vstack([1 - calibrated_probs, calibrated_probs]).T
-    def predict(self, X, thr=0.5):
-        import numpy as np
-        return (self.predict_proba(X)[:, 1] >= thr).astype(int)
+warnings.filterwarnings("ignore")
 
-# 🔑 مهم جدًا: عرّفيه داخل __main__ للطرف الآخر (الـ unpickler)
-import __main__
-__main__.CalibratedModelWrapper = CalibratedModelWrapper
-# ----------------------------------------------------------
+# ==============================================================
+#  FastAPI APP + Load Model
+# ==============================================================
+app = FastAPI(title="Trading Signal REST API", version="1.0")
 
-app = FastAPI(title="AI Trading Signal Prediction API")
+# Load model only once at startup
+model, params, features = load_model_and_params()
 
-# load metadata + model
-meta = json.load(open(MODELS_DIR / "metadata.json"))
-features = meta["target_hit_model"]["features"]
-best_thr = meta["target_hit_model"]["metrics_val"]["best_threshold"]
-
-model = joblib.load(MODELS_DIR / "model_target_hit_final_calibrated.pkl")
-
-# request schema
-class SignalRequest(BaseModel):
-    entry_price: float
+# ==============================================================
+#  Request Schema
+# ==============================================================
+class Candle(BaseModel):
     open: float
     high: float
     low: float
     close: float
     volume: float
-    rsi: float
-    rsi_3d: float
-    candle_body: float
-    candle_wick: float
+    timestamp: datetime = datetime.now()
+
+# ==============================================================
+#  Endpoints
+# ==============================================================
+
+@app.get("/")
+def root():
+    """Simple health‑check endpoint."""
+    return {"status": "ok", "message": "Trading Signal API running ✅"}
 
 @app.post("/predict")
-def predict(req: SignalRequest):
-    X = pd.DataFrame([req.dict()])[features]
-    prob = float(model.predict_proba(X)[0,1])
-    enter = prob >= best_thr
-    return {
-        "enter_trade": bool(enter),
-        "target_probability": round(prob,3),
-        "stop_probability": round(1-prob,3),
-        "expected_outcome": "target" if enter else "stop",
-        "estimated_time_to_event": "45 minutes",
-        "confidence_score": (
-            "high" if prob>0.7 else "medium" if prob>0.5 else "low"
-        )
-    }
+def predict_signal(data: Candle):    
+    """
+    Receives a list of candles (each one is a dict of open/high/low/close/volume).
+    Returns a trading signal recommendation with confidence.
+    """
+    try:
+        df = pd.DataFrame([data.dict()])
+        df.set_index("timestamp", inplace=True)
+        result = generate_signal(model, params, features, df)
+        return result if result else {"error": "Failed to produce signal."}
+    except Exception as e:
+        return {"error": f"{e}"}

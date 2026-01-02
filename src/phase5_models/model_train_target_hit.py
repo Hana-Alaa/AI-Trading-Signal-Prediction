@@ -65,29 +65,59 @@ def prepare_data(df, target_col='target_hit', reference_features=None):
 # ======================================
 def train_logistic_regression(X_train, y_train):
     print("\n" + "="*40)
-    print("⏳ Training Logistic Regression (v1.0)...")
+    print("⏳ Training Logistic Regression (Basic v1.0)...")
     model = LogisticRegression(max_iter=1000, random_state=42, class_weight='balanced')
     model.fit(X_train, y_train)
     print("✅ Logistic Regression Training Complete.")
     return model
 
+def train_logistic_regression_tuned(X_train, y_train):
+    print("\n" + "="*40)
+    print("⏳ Training Logistic Regression with Tuning (v1.5)...")
+    base_model = LogisticRegression(max_iter=2000, random_state=42, class_weight='balanced')
+    param_grid = {
+        'C': [0.001, 0.01, 0.1, 1, 10, 100],
+        'penalty': ['l1', 'l2'],
+        'solver': ['liblinear', 'saga']
+    }
+    search = RandomizedSearchCV(base_model, param_grid, n_iter=10, scoring='f1', cv=3, random_state=42, n_jobs=-1)
+    search.fit(X_train, y_train)
+    print("\n✅ Best LR Params:", search.best_params_)
+    return search.best_estimator_
+
 def train_random_forest(X_train, y_train):
     """Train Random Forest with simple tuning."""
     print("\n" + "="*40)
-    print("⏳ Training Random Forest (v1.2)...")
+    print("⏳ Training Random Forest (Basic v1.2)...")
 
     rf = RandomForestClassifier(
-    n_estimators=300,
-    max_depth=8,             
-    min_samples_split=10,
-    min_samples_leaf=5,
-    class_weight="balanced_subsample",
-    random_state=42,
-    n_jobs=-1
+        n_estimators=300,
+        max_depth=8,             
+        min_samples_split=10,
+        min_samples_leaf=5,
+        class_weight="balanced_subsample",
+        random_state=42,
+        n_jobs=-1
     )
     rf.fit(X_train, y_train)
     print("✅ Random Forest Training Complete.")
     return rf
+
+def train_random_forest_tuned(X_train, y_train):
+    print("\n" + "="*40)
+    print("⏳ Training Random Forest with Random Search (v1.6)...")
+    base_rf = RandomForestClassifier(class_weight="balanced_subsample", random_state=42, n_jobs=-1)
+    param_dist = {
+        "n_estimators": [200, 400, 600],
+        "max_depth": [6, 12, 18, None],
+        "min_samples_split": [2, 5, 10],
+        "min_samples_leaf": [1, 2, 4],
+        "bootstrap": [True, False]
+    }
+    search = RandomizedSearchCV(base_rf, param_dist, n_iter=10, scoring="f1", cv=3, random_state=42, n_jobs=-1)
+    search.fit(X_train, y_train)
+    print("\n✅ Best RF Params:", search.best_params_)
+    return search.best_estimator_
 
 def train_lightgbm_basic(X_train, y_train):
     """Train LightGBM model with basic/default hyperparameters (no tuning)."""
@@ -161,6 +191,26 @@ def train_lightgbm(X_train, y_train):
     print("✅ LightGBM Training Complete with optimized parameters.")
     return best_model
 
+def train_xgboost_basic(X_train, y_train):
+    print("\n" + "="*40)
+    print("⏳ Training XGBoost (Basic v1.7)...")
+    count_neg = (y_train == 0).sum()
+    count_pos = (y_train == 1).sum()
+    scale_weight = count_neg / (count_pos + 1e-9)
+
+    model = XGBClassifier(
+        n_estimators=300,
+        max_depth=6,
+        learning_rate=0.05,
+        random_state=42,
+        use_label_encoder=False,
+        eval_metric='logloss',
+        scale_pos_weight=scale_weight
+    )
+    model.fit(X_train, y_train)
+    print("✅ XGBoost Basic Training Complete.")
+    return model
+
 def train_xgboost(X_train, y_train):
     print("\n" + "="*40)
     print("⏳ Training XGBoost with Hyperparameter Tuning (v1.1)...")
@@ -195,7 +245,7 @@ def train_xgboost(X_train, y_train):
     tuner.fit(X_train, y_train)
     print("\n✅ Best XGB Params:", tuner.best_params_)
     best_model = tuner.best_estimator_
-    print("✅ XGBoost Training Complete.")
+    print("✅ XGBoost Tuning Complete.")
     return best_model
 
 # ======================================
@@ -254,11 +304,17 @@ def evaluate_model(model, X_val, y_val, model_label, X_train=None, y_train=None)
         print(f"TRAIN → Acc: {acc_tr:.4f}, F1: {f1_tr:.4f}")
         print(f"⚖️  Gap (Train − Val F1): {f1_tr - f1:.4f}\n")
 
-    # Confusion Matrix
+    # Confusion Matrix Console Output
     cm = confusion_matrix(y_val, y_pred_best)
+    tn, fp, fn, tp = cm.ravel()
+    print(f"\n🧩 Confusion Matrix (Threshold={best_thresh:.2f}):")
+    print(f"   TN: {tn:<8} FP: {fp}")
+    print(f"   FN: {fn:<8} TP: {tp}")
+
+    # Plot Confusion Matrix
     plt.figure(figsize=(4,3))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-    plt.title(f"Confusion Matrix – {model_label} (thr={best_thresh})")
+    plt.title(f"Confusion Matrix – {model_label} (thr={best_thresh:.2f})")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.tight_layout()
@@ -266,15 +322,32 @@ def evaluate_model(model, X_val, y_val, model_label, X_train=None, y_train=None)
 
     # Classification Report
     print("\n📋 Classification Report Summary:")
+    report = classification_report(y_val, y_pred_best, zero_division=0, digits=4, output_dict=True)
     print(classification_report(y_val, y_pred_best, zero_division=0, digits=4))
 
+    # Calculate Train metrics more formally if provided
+    train_metrics = {}
+    if X_train is not None and y_train is not None:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        y_train_pred = (y_train_prob >= best_thresh).astype(int)
+        train_metrics = {
+            "accuracy": accuracy_score(y_train, y_train_pred),
+            "precision": precision_score(y_train, y_train_pred, zero_division=0),
+            "recall": recall_score(y_train, y_train_pred, zero_division=0),
+            "f1_score": f1_score(y_train, y_train_pred, zero_division=0),
+            "roc_auc": roc_auc_score(y_train, y_train_prob)
+        }
+
     return {
-        "accuracy": acc,
-        "precision": prec,
-        "recall": rec,
-        "f1_score": f1,
-        "roc_auc": roc,
-        "best_threshold": float(best_thresh)
+        "val": {
+            "accuracy": acc,
+            "precision": prec,
+            "recall": rec,
+            "f1_score": f1,
+            "roc_auc": roc,
+            "best_threshold": float(best_thresh)
+        },
+        "train": train_metrics
     }
 
 from sklearn.isotonic import IsotonicRegression
@@ -379,103 +452,85 @@ def main():
         X_val, y_val = prepare_data(valid, reference_features=feature_list)
         print(f"Feature count: {X_train.shape[1]}")
 
-        # 1️. Logistic Regression
+        # 1. Logistic Regression
         lr = train_logistic_regression(X_train, y_train)
+        lr_metrics = evaluate_model(lr, X_val, y_val, "LR Basic (v1.0)", X_train, y_train)
+        save_model_info(lr, lr_metrics["val"], "Logistic Regression", "1.2.2_balanced15", feature_list)
 
-        # Train Performance
-        y_pred_train = lr.predict(X_train)
-        train_acc = accuracy_score(y_train, y_pred_train)
-        train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\nLogistic Regression Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
+        lr_tuned = train_logistic_regression_tuned(X_train, y_train)
+        lr_tuned_metrics = evaluate_model(lr_tuned, X_val, y_val, "LR Tuned (v1.5)", X_train, y_train)
+        save_model_info(lr_tuned, lr_tuned_metrics["val"], "Logistic Regression Tuned", "1.5.2_balanced15", feature_list)
 
-        # Validation Performance
-        lr_metrics = evaluate_model(lr, X_val, y_val, "Logistic Regression (v1.2)")
+        # 2. XGBoost
+        xgb_basic = train_xgboost_basic(X_train, y_train)
+        xgb_basic_metrics = evaluate_model(xgb_basic, X_val, y_val, "XGB Basic (v1.7)", X_train, y_train)
+        save_model_info(xgb_basic, xgb_basic_metrics["val"], "XGBoost Basic", "1.7.2_balanced15", feature_list)
 
-        save_model_info(lr, lr_metrics, "Logistic Regression", "1.2.2_balanced15", X_train.columns)
-
-        # 2. XGBoost (v1.2.2)
         xgb = train_xgboost(X_train, y_train)
-        
-        # Validation Performance
-        xgb_metrics = evaluate_model(xgb, X_val, y_val, "XGBoost (v1.2.2)", X_train, y_train)
-        
-        # Save Model Info
-        save_model_info(xgb, xgb_metrics, "XGBoost", "1.2.2_balanced15", feature_list)
+        xgb_metrics = evaluate_model(xgb, X_val, y_val, "XGB Tuned (v1.1)", X_train, y_train)
+        save_model_info(xgb, xgb_metrics["val"], "XGBoost", "1.2.2_balanced15", feature_list)
 
-        # 3️. Random Forest
+        # 3. Random Forest
         rf = train_random_forest(X_train, y_train)
+        rf_metrics = evaluate_model(rf, X_val, y_val, "RF Basic (v1.2)", X_train, y_train)
+        save_model_info(rf, rf_metrics["val"], "Random Forest", "1.2.2_balanced15", feature_list)
 
-        # Train Performance
-        y_pred_train = rf.predict(X_train)
-        train_acc = accuracy_score(y_train, y_pred_train)
-        train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\nRandom Forest Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
+        rf_tuned = train_random_forest_tuned(X_train, y_train)
+        rf_tuned_metrics = evaluate_model(rf_tuned, X_val, y_val, "RF Tuned (v1.6)", X_train, y_train)
+        save_model_info(rf_tuned, rf_tuned_metrics["val"], "Random Forest Tuned", "1.6.2_balanced15", feature_list)
 
-        # Validation Performance
-        rf_metrics = evaluate_model(rf, X_val, y_val, "Random Forest (v1.2)")
-
-        save_model_info(rf, rf_metrics, "Random Forest", "1.2.2_balanced15", X_train.columns)
-
-        # 4️. LightGBM – Basic
+        # 4. LightGBM
         lgb_basic = train_lightgbm_basic(X_train, y_train)
+        lgb_basic_metrics = evaluate_model(lgb_basic, X_val, y_val, "LGB Basic (v1.3)", X_train, y_train)
+        save_model_info(lgb_basic, lgb_basic_metrics["val"], "LightGBM Basic", "1.3_balanced15", feature_list)
 
-        # Performance
-        y_pred_train_basic = lgb_basic.predict(X_train)
-        train_acc_basic = accuracy_score(y_train, y_pred_train_basic)
-        train_f1_basic  = f1_score(y_train, y_pred_train_basic, zero_division=0)
-        print(f"\nLightGBM (Basic) Train Accuracy: {train_acc_basic:.4f} | Train F1: {train_f1_basic:.4f}")
-
-        lgb_basic_metrics = evaluate_model(lgb_basic, X_val, y_val, "LightGBM (Basic v1.3)")
-
-        save_model_info(lgb_basic, lgb_basic_metrics, "LightGBM Basic", "1.3_balanced15", X_train.columns)
-
-        # 5. LightGBM (tuned)
         lgb = train_lightgbm(X_train, y_train)
-
-        # Train Performance
-        y_pred_train = lgb.predict(X_train)
-        train_acc = accuracy_score(y_train, y_pred_train)
-        train_f1  = f1_score(y_train, y_pred_train, zero_division=0)
-        print(f"\nLightGBM Train Accuracy: {train_acc:.4f} | Train F1: {train_f1:.4f}")
-
-        # Validation Performance
-        lgb_metrics = evaluate_model(lgb, X_val, y_val, "LightGBM (v1.4)")
-
-        save_model_info(lgb, lgb_metrics, "LightGBM", "1.4.2_balanced15", X_train.columns)
+        lgb_metrics = evaluate_model(lgb, X_val, y_val, "LGB Tuned (v1.4)", X_train, y_train)
+        save_model_info(lgb, lgb_metrics["val"], "LightGBM", "1.4.2_balanced15", feature_list)
 
         print("\n" + "="*40)
-        print("COMPARISON SUMMARY (Best F1):")
-        print(f"🔹 Logistic Regression: {lr_metrics['f1_score']:.4f}")
-        print(f"🔹 XGBoost:             {xgb_metrics['f1_score']:.4f}")
-        print(f"🔹 Random Forest:       {rf_metrics['f1_score']:.4f}")
-        print(f"🔹 LightGBM (Basic):    {lgb_basic_metrics['f1_score']:.4f}")
-        print(f"🔹 LightGBM:            {lgb_metrics['f1_score']:.4f}")
+        print("🏁 COMPARISON SUMMARY:")
         print("="*40)
+        
+        results_list = []
+        for name, m in [
+            ("LR Basic", lr_metrics),
+            ("LR Tuned", lr_tuned_metrics),
+            ("XGB Basic", xgb_basic_metrics),
+            ("XGB Tuned", xgb_metrics),
+            ("RF Basic", rf_metrics),
+            ("RF Tuned", rf_tuned_metrics),
+            ("LGB Basic", lgb_basic_metrics),
+            ("LGB Tuned", lgb_metrics)
+        ]:
+            row = {
+                "Model": name,
+                "Train_Acc": m["train"].get("accuracy", 0),
+                "Train_Prec": m["train"].get("precision", 0),
+                "Train_Rec": m["train"].get("recall", 0),
+                "Train_F1": m["train"].get("f1_score", 0),
+                "Val_Acc": m["val"]["accuracy"],
+                "Val_Prec": m["val"]["precision"],
+                "Val_Rec": m["val"]["recall"],
+                "Val_F1": m["val"]["f1_score"],
+                "Gap_F1": m["train"].get("f1_score", 0) - m["val"]["f1_score"]
+            }
+            results_list.append(row)
 
-        train_f1_lr  = f1_score(y_train, lr.predict(X_train), zero_division=0)
-        train_f1_xgb = f1_score(y_train, xgb.predict(X_train), zero_division=0)
-        train_f1_rf  = f1_score(y_train, rf.predict(X_train), zero_division=0)
-        train_f1_lgb_basic = f1_score(y_train, lgb_basic.predict(X_train), zero_division=0)
-        train_f1_lgb = f1_score(y_train, lgb.predict(X_train), zero_division=0)
+        summary = pd.DataFrame(results_list)
+        print(summary.round(4).to_string(index=False))
 
-        summary = pd.DataFrame([
-            ["Logistic Regression", train_f1_lr,  lr_metrics["f1_score"]],
-            ["XGBoost",             train_f1_xgb, xgb_metrics["f1_score"]],
-            ["Random Forest",       train_f1_rf,  rf_metrics["f1_score"]],
-            ["LightGBM (Basic)",    train_f1_lgb_basic, lgb_basic_metrics["f1_score"]],
-            ["LightGBM",            train_f1_lgb, lgb_metrics["f1_score"]],
-        ], columns=["Model", "Train_F1", "Val_F1"])
-
-        summary["Gap"] = summary["Train_F1"] - summary["Val_F1"]
-
-        print("\n F1 Comparison Table:")
-        print(summary.round(4))
+        # Save detailed summary to file
+        log_dir = project_root / "logs"
+        log_dir.mkdir(exist_ok=True)
+        summary_path = log_dir / "target_hit_model_training_summary.csv"
+        summary.to_csv(summary_path, index=False)
+        print(f"\n📊 Detailed training summary saved to: {summary_path}")
 
         # 5. Calibration (Probability Alignment)
         # Note: We calibrate on X_val. Testing the calibrated model on X_val and Gap again 
         # will yield optimistic results. Final judgment must be on the Test set.
-        stable_models = summary[summary['Gap'] <= 0.04]
-
+        stable_models = summary[summary['Gap_F1'].abs() <= 0.05]
         if not stable_models.empty:
             best_model_name = stable_models.loc[stable_models['Val_F1'].idxmax(), 'Model']
         else:
@@ -484,11 +539,14 @@ def main():
         print(f"\n🏆 Smart selection for calibration: {best_model_name}")
         
         best_models_map = {
-            "Logistic Regression": lr,
-            "XGBoost": xgb,
-            "Random Forest": rf,
-            "LightGBM (Basic)": lgb_basic,
-            "LightGBM (Tuning)": lgb
+            "LR Basic": lr,
+            "LR Tuned": lr_tuned,
+            "XGB Basic": xgb_basic,
+            "XGB Tuned": xgb,
+            "RF Basic": rf,
+            "RF Tuned": rf_tuned,
+            "LGB Basic": lgb_basic,
+            "LGB Tuned": lgb
         }
         raw_best_model = best_models_map[best_model_name]
         
@@ -500,7 +558,7 @@ def main():
         calib_metrics = evaluate_model(calibrated_model, X_val, y_val, f"{best_model_name} (Calibrated v1.5)")
         
         # Save Calibrated Model
-        save_model_info(calibrated_model, calib_metrics, f"{best_model_name} Calibrated", "1.5_calibrated", X_train.columns)
+        save_model_info(calibrated_model, calib_metrics["val"], f"{best_model_name} Calibrated", "1.5_calibrated", feature_list)
         
         # Save explicitly as the "Final" model for easy access
         final_calibrated_path = MODELS_DIR / "model_target_hit_final_calibrated.pkl"
