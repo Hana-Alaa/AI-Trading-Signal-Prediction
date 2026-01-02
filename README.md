@@ -117,7 +117,7 @@ AI-Trading-Signal-Prediction/
 │   ├─ 02_EDA_and_visual_analysis.ipynb
 │   └─ shap_explanation.ipynb
 │
-├─ pipeline_scripts/                       # Feature engineering & modeling scripts
+├─ src/                       # Feature engineering & modeling scripts
 │   ├─ phase3_feature_engineering.py
 │   ├─ phase4_preprocessing_stop_hit.py
 │   ├─ phase4_preprocessing_target_hit.py
