@@ -240,43 +240,5 @@ def main():
     except Exception as e:
         print(f"❌ Error in feature engineering pipeline: {e}")
 
-
-# def main():
-#     """
-#     Main execution pipeline.
-#     """
-#     try:
-#         # 1. Load Data
-#         input_path = PROCESSED_DATA_DIR / "step1_quality_checked.csv"
-#         if not input_path.exists():
-#              raise FileNotFoundError(f"Input file not found: {input_path}")
-             
-#         print(f"📂 Loading data from {input_path}...")
-#         df = pd.read_csv(input_path)
-        
-#         # 2. Feature Engineering Pipeline
-#         df = calculate_price_action_features(df)
-#         df = calculate_volatility_features(df)
-#         df = calculate_momentum_features(df)
-        
-#         # 3. Feature Selection
-#         df = perform_feature_selection(df)
-        
-#         # 4. Summary Stats
-#         print("\n📊 Final Feature Summary:")
-#         print(f"Price Action:  {len([c for c in df.columns if 'candle' in c or 'ratio_' in c or 'wick' in c])}")
-#         print(f"Volatility:    {len([c for c in df.columns if 'rolling_' in c or 'bb_' in c or 'atr' in c or 'z_score' in c])}")
-#         print(f"Momentum:      {len([c for c in df.columns if 'rsi' in c or 'macd' in c or 'roc_' in c])}")
-#         print(f"Total Columns: {len(df.columns)}")
-        
-#         # 5. Save
-#         output_path = PROCESSED_DATA_DIR / "step3_features_engineered.csv"
-#         df.to_csv(output_path, index=False)
-#         print(f"\n💾 Saved engineered data to: {output_path}")
-        
-#     except Exception as e:
-#         print(f"❌ Error in feature engineering pipeline: {e}")
-#         # raise e # Optional: Raise if you want stack trace
-
 if __name__ == "__main__":
     main()

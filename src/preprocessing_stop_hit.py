@@ -333,9 +333,10 @@ def main():
         full_path = PROCESSED_DATA_DIR / "step4_preprocessed_full.csv"
         df.to_csv(full_path, index=False)
         print(f"💾 Saved full preprocessed (cleaned & balanced) data to: {full_path}")
-        
+
         # 5. Time-based split
         train, valid, test = perform_time_based_split(df)
+        train = balance_dataset(train, target_col="stop_hit", ratio=2.5)
         
         for split_name, split_df in zip(["train", "valid", "test"], [train, valid, test]):
             if "created_at" in split_df.columns:
