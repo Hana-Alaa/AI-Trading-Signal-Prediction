@@ -22,11 +22,15 @@ class CalibratedModelWrapper:
 def load_model_and_params():
     import __main__
     __main__.CalibratedModelWrapper = CalibratedModelWrapper
-    model = joblib.load(MODELS_DIR / "model_target_hit_final_calibrated.pkl")
-    meta = json.load(open(MODELS_DIR / "metadata.json"))
-    params = meta["optimized_params"]
-    features = meta["target_hit_model"]["features"]
-    return model, params, features
+    try:
+        model = joblib.load(MODELS_DIR / "model_target_hit_final_calibrated.pkl")
+        meta = json.load(open(MODELS_DIR / "metadata.json"))
+        params = meta.get("optimized_params", {})
+        features = meta["target_hit_model"]["features"]
+        print("✅ Model & parameters loaded successfully.")
+        return model, params, features
+    except Exception as e:
+        raise RuntimeError(f"❌ Failed to load model or metadata: {e}")
 
 # --- Generate Signal ---
 def generate_signal(model, params, features, user_input):
