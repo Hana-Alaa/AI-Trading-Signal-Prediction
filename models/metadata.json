@@ -805,9 +805,16 @@
         }
     ],
     "optimized_params": {
-        "threshold": 0.5,
-        "risk_fraction": 0.02,
-        "reward_risk_ratio": 3.0
+        "entry_thr": 0.75,
+        "stop_thr": 0.2,
+        "risk": 0.02,
+        "rr": 3.0,
+        "roi": 419.6375826939184,
+        "sharpe": 4.376118835917802,
+        "max_dd": 17.85709825956795,
+        "win_rate": 45.83333333333333,
+        "trades": 168.0,
+        "score": 97.38422659775358
     },
     "realistic_backtest": {
         "roi": 68809.43200959945,
