@@ -1,25 +1,33 @@
 {
     "target_hit_model": {
-        "version": "1.5_calibrated",
-        "algorithm": "XGB Tuned Calibrated",
-        "trained_at": "2026-01-02 15:01:35",
+        "version": "calibrated",
+        "algorithm": "RF Basic Calibrated",
+        "trained_at": "2026-01-07 23:49:10",
         "created_by": "Hana Alaa",
         "metrics_val": {
-            "accuracy": 0.8045685279187818,
-            "precision": 0.8115412710007305,
-            "recall": 0.9569336778639104,
-            "f1_score": 0.8782608695652174,
-            "roc_auc": 0.8321173583221776,
-            "best_threshold": 0.35
+            "accuracy": 0.5859771573604061,
+            "precision": 0.829126213592233,
+            "recall": 0.5516795865633075,
+            "f1_score": 0.6625290923196276,
+            "roc_auc": 0.6644316283220739,
+            "pr_auc": 0.8340878358587289,
+            "precision_at_5": 0.9872611464968153,
+            "precision_at_10": 0.9301587301587302,
+            "precision_at_20": 0.9079365079365079,
+            "best_threshold": 0.74
         },
-        "feature_count": 12,
+        "metrics_train": {
+            "accuracy": 0.6723927213470939,
+            "precision": 0.9069044723685988,
+            "recall": 0.6187315634218289,
+            "f1_score": 0.7356019507918242,
+            "roc_auc": 0.8021005344706993,
+            "pr_auc": 0.9037768048688333
+        },
+        "feature_count": 8,
         "features": [
             "close",
             "volume",
-            "RSI",
-            "rsi_1d",
-            "rsi_3d",
-            "atr_1h",
             "candle_body",
             "upper_wick",
             "candle_range",
@@ -27,38 +35,45 @@
             "ratio_high_low",
             "ratio_close_high"
         ],
-        "model_path": "model_target_hit_v1.5_calibrated.pkl"
+        "model_path": "model_target_hit_vcalibrated.pkl"
     },
     "stop_hit_model": {
-        "version": "1.5_calibrated",
-        "algorithm": "RF Tuned Calibrated",
-        "trained_at": "2026-01-02 13:19:31",
+        "version": "calibrated",
+        "algorithm": "XGB Tuned Calibrated",
+        "trained_at": "2026-01-07 23:53:23",
         "created_by": "Hana Alaa",
         "metrics_val": {
-            "accuracy": 0.9280575539568345,
-            "precision": 0.5222929936305732,
-            "recall": 0.4632768361581921,
-            "f1_score": 0.49101796407185627,
-            "roc_auc": 0.8854911325796931,
-            "best_threshold": 0.2
+            "accuracy": 0.9255499153976311,
+            "precision": 1.0,
+            "recall": 0.011235955056179775,
+            "f1_score": 0.022222222222222223,
+            "roc_auc": 0.6840658634620722,
+            "pr_auc": 0.14783580304438393,
+            "precision_at_5": 0.211864406779661,
+            "precision_at_10": 0.15677966101694915,
+            "precision_at_20": 0.1419491525423729,
+            "best_threshold": 0.24000000000000002
         },
-        "feature_count": 13,
+        "metrics_train": {
+            "accuracy": 0.9244275500045253,
+            "precision": 1.0,
+            "recall": 0.0023894862604540022,
+            "f1_score": 0.004767580452920143,
+            "roc_auc": 0.7950370894503667,
+            "pr_auc": 0.25139185926923163
+        },
+        "feature_count": 8,
         "features": [
             "close",
             "volume",
-            "RSI",
-            "rsi_1d",
-            "rsi_3d",
-            "atr_1h",
             "candle_body",
             "upper_wick",
             "candle_range",
             "wick_ratio",
             "ratio_high_low",
-            "ratio_close_high",
-            "time_bin"
+            "ratio_close_high"
         ],
-        "model_path": "model_stop_hit_v1.5_calibrated.pkl"
+        "model_path": "model_stop_hit_vcalibrated.pkl"
     },
     "target_hit_versions": [
         {
@@ -445,6 +460,348 @@
                 "ratio_close_high"
             ],
             "model_path": "model_target_hit_v1.5_calibrated.pkl"
+        },
+        {
+            "version": "lr_basic",
+            "algorithm": "LR Basic",
+            "trained_at": "2026-01-07 23:49:06",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.4971446700507614,
+                "precision": 0.7760299625468164,
+                "recall": 0.446167097329888,
+                "f1_score": 0.5665846322121958,
+                "roc_auc": 0.5611277149943443,
+                "pr_auc": 0.7854007963446822,
+                "precision_at_5": 0.9044585987261147,
+                "precision_at_10": 0.8253968253968254,
+                "precision_at_20": 0.8063492063492064,
+                "best_threshold": 0.49
+            },
+            "metrics_train": {
+                "accuracy": 0.48682781097229766,
+                "precision": 0.7610282450015868,
+                "recall": 0.44210914454277284,
+                "f1_score": 0.5593002915451895,
+                "roc_auc": 0.5418121160630113,
+                "pr_auc": 0.7725031200753595
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vlr_basic.pkl"
+        },
+        {
+            "version": "lr_tuned",
+            "algorithm": "LR Tuned",
+            "trained_at": "2026-01-07 23:49:06",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.49746192893401014,
+                "precision": 0.7761976047904192,
+                "recall": 0.44659776055124895,
+                "f1_score": 0.5669764898851831,
+                "roc_auc": 0.5611022902981435,
+                "pr_auc": 0.7853759265479447,
+                "precision_at_5": 0.9044585987261147,
+                "precision_at_10": 0.8253968253968254,
+                "precision_at_20": 0.8063492063492064,
+                "best_threshold": 0.49
+            },
+            "metrics_train": {
+                "accuracy": 0.48682781097229766,
+                "precision": 0.7607799619530755,
+                "recall": 0.4423856932153392,
+                "f1_score": 0.5594544182793192,
+                "roc_auc": 0.5417348772542042,
+                "pr_auc": 0.7724893551284664
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vlr_tuned.pkl"
+        },
+        {
+            "version": "xgb_basic",
+            "algorithm": "XGB Basic",
+            "trained_at": "2026-01-07 23:49:07",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.5548857868020305,
+                "precision": 0.8411284335560505,
+                "recall": 0.4879414298018949,
+                "f1_score": 0.6176069773780322,
+                "roc_auc": 0.6607084669427062,
+                "pr_auc": 0.8424188187531234,
+                "precision_at_5": 0.9490445859872612,
+                "precision_at_10": 0.9333333333333333,
+                "precision_at_20": 0.8809523809523809,
+                "best_threshold": 0.8
+            },
+            "metrics_train": {
+                "accuracy": 0.7468766974470397,
+                "precision": 0.9937586685159501,
+                "recall": 0.6604904129793511,
+                "f1_score": 0.7935541034444568,
+                "roc_auc": 0.9704170729366237,
+                "pr_auc": 0.9890768684738371
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vxgb_basic.pkl"
+        },
+        {
+            "version": "xgb_tuned",
+            "algorithm": "XGB Tuned",
+            "trained_at": "2026-01-07 23:49:07",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.620241116751269,
+                "precision": 0.8126737076153419,
+                "recall": 0.6296296296296297,
+                "f1_score": 0.7095365202620724,
+                "roc_auc": 0.6557823023359588,
+                "pr_auc": 0.8387012196458512,
+                "precision_at_5": 0.9490445859872612,
+                "precision_at_10": 0.9142857142857143,
+                "precision_at_20": 0.8809523809523809,
+                "best_threshold": 0.75
+            },
+            "metrics_train": {
+                "accuracy": 0.8399646931015752,
+                "precision": 0.9850337027304924,
+                "recall": 0.7948008849557522,
+                "f1_score": 0.8797510331105556,
+                "roc_auc": 0.9677541040393212,
+                "pr_auc": 0.988110561732648
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vxgb_tuned.pkl"
+        },
+        {
+            "version": "rf_tuned",
+            "algorithm": "RF Tuned",
+            "trained_at": "2026-01-07 23:49:08",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.6186548223350253,
+                "precision": 0.8156708004509583,
+                "recall": 0.6231696813092162,
+                "f1_score": 0.70654296875,
+                "roc_auc": 0.6605714849060325,
+                "pr_auc": 0.8427941326897599,
+                "precision_at_5": 0.9808917197452229,
+                "precision_at_10": 0.9333333333333333,
+                "precision_at_20": 0.8793650793650793,
+                "best_threshold": 0.56
+            },
+            "metrics_train": {
+                "accuracy": 0.8295763172189028,
+                "precision": 0.9931393423231606,
+                "recall": 0.7739675516224189,
+                "f1_score": 0.8699616620039374,
+                "roc_auc": 0.9696638223017973,
+                "pr_auc": 0.989569816163503
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vrf_tuned.pkl"
+        },
+        {
+            "version": "lgb_basic",
+            "algorithm": "LGB Basic",
+            "trained_at": "2026-01-07 23:49:09",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.5415609137055838,
+                "precision": 0.8494023904382471,
+                "recall": 0.4590869939707149,
+                "f1_score": 0.5960301928990774,
+                "roc_auc": 0.6591196828658302,
+                "pr_auc": 0.8440108788370732,
+                "precision_at_5": 0.9681528662420382,
+                "precision_at_10": 0.9206349206349206,
+                "precision_at_20": 0.8968253968253969,
+                "best_threshold": 0.77
+            },
+            "metrics_train": {
+                "accuracy": 0.6462520369364476,
+                "precision": 0.9529241645244216,
+                "recall": 0.5467367256637168,
+                "f1_score": 0.694821930646673,
+                "roc_auc": 0.8551967154380683,
+                "pr_auc": 0.9408461133050279
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vlgb_basic.pkl"
+        },
+        {
+            "version": "lgb_tuned",
+            "algorithm": "LGB Tuned",
+            "trained_at": "2026-01-07 23:49:09",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.5539340101522843,
+                "precision": 0.8338192419825073,
+                "recall": 0.4926787252368648,
+                "f1_score": 0.6193827828911749,
+                "roc_auc": 0.6624513558108402,
+                "pr_auc": 0.8443510153914039,
+                "precision_at_5": 0.9617834394904459,
+                "precision_at_10": 0.9301587301587302,
+                "precision_at_20": 0.8825396825396825,
+                "best_threshold": 0.77
+            },
+            "metrics_train": {
+                "accuracy": 0.674565453557849,
+                "precision": 0.9561548892571945,
+                "recall": 0.5849926253687315,
+                "f1_score": 0.7258793251358308,
+                "roc_auc": 0.8762177051021806,
+                "pr_auc": 0.9506389937657532
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vlgb_tuned.pkl"
+        },
+        {
+            "version": "rf_basic",
+            "algorithm": "RF Basic",
+            "trained_at": "2026-01-07 23:49:09",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.5736040609137056,
+                "precision": 0.8304054054054054,
+                "recall": 0.529285099052541,
+                "f1_score": 0.6465018411362441,
+                "roc_auc": 0.6578536367692995,
+                "pr_auc": 0.8425486911139296,
+                "precision_at_5": 0.9872611464968153,
+                "precision_at_10": 0.9079365079365079,
+                "precision_at_20": 0.8920634920634921,
+                "best_threshold": 0.53
+            },
+            "metrics_train": {
+                "accuracy": 0.6590168386746333,
+                "precision": 0.9087847319674431,
+                "recall": 0.596976401179941,
+                "f1_score": 0.7205964170468454,
+                "roc_auc": 0.8122956058221573,
+                "pr_auc": 0.922634835534357
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vrf_basic.pkl"
+        },
+        {
+            "version": "calibrated",
+            "algorithm": "RF Basic Calibrated",
+            "trained_at": "2026-01-07 23:49:10",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.5859771573604061,
+                "precision": 0.829126213592233,
+                "recall": 0.5516795865633075,
+                "f1_score": 0.6625290923196276,
+                "roc_auc": 0.6644316283220739,
+                "pr_auc": 0.8340878358587289,
+                "precision_at_5": 0.9872611464968153,
+                "precision_at_10": 0.9301587301587302,
+                "precision_at_20": 0.9079365079365079,
+                "best_threshold": 0.74
+            },
+            "metrics_train": {
+                "accuracy": 0.6723927213470939,
+                "precision": 0.9069044723685988,
+                "recall": 0.6187315634218289,
+                "f1_score": 0.7356019507918242,
+                "roc_auc": 0.8021005344706993,
+                "pr_auc": 0.9037768048688333
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_target_hit_vcalibrated.pkl"
         }
     ],
     "optimized_params": {
@@ -683,6 +1040,348 @@
                 "time_bin"
             ],
             "model_path": "model_stop_hit_v1.5_calibrated.pkl"
+        },
+        {
+            "version": "lr_basic",
+            "algorithm": "LR Basic",
+            "trained_at": "2026-01-07 23:53:13",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.40820642978003385,
+                "precision": 0.0849762066621346,
+                "recall": 0.702247191011236,
+                "f1_score": 0.15160703456640387,
+                "roc_auc": 0.5634605302383914,
+                "pr_auc": 0.08701514366950103,
+                "precision_at_5": 0.09322033898305085,
+                "precision_at_10": 0.0635593220338983,
+                "precision_at_20": 0.07838983050847458,
+                "best_threshold": 0.5
+            },
+            "metrics_train": {
+                "accuracy": 0.4194949769209883,
+                "precision": 0.0864600326264274,
+                "recall": 0.6965352449223416,
+                "f1_score": 0.15382585751978892,
+                "roc_auc": 0.5705630829520497,
+                "pr_auc": 0.09511595477007381
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vlr_basic.pkl"
+        },
+        {
+            "version": "lr_tuned",
+            "algorithm": "LR Tuned",
+            "trained_at": "2026-01-07 23:53:15",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.4086294416243655,
+                "precision": 0.08559782608695653,
+                "recall": 0.7078651685393258,
+                "f1_score": 0.15272727272727274,
+                "roc_auc": 0.5634245505103982,
+                "pr_auc": 0.08691131150107326,
+                "precision_at_5": 0.09322033898305085,
+                "precision_at_10": 0.0635593220338983,
+                "precision_at_20": 0.07838983050847458,
+                "best_threshold": 0.5
+            },
+            "metrics_train": {
+                "accuracy": 0.4186804235677437,
+                "precision": 0.085976875185295,
+                "recall": 0.6929510155316607,
+                "f1_score": 0.15297375708822367,
+                "roc_auc": 0.5705059898608286,
+                "pr_auc": 0.09508178047350926
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vlr_tuned.pkl"
+        },
+        {
+            "version": "xgb_basic",
+            "algorithm": "XGB Basic",
+            "trained_at": "2026-01-07 23:53:17",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9141285956006768,
+                "precision": 0.35294117647058826,
+                "recall": 0.16853932584269662,
+                "f1_score": 0.22813688212927757,
+                "roc_auc": 0.7157113192224267,
+                "pr_auc": 0.22701043040603736,
+                "precision_at_5": 0.288135593220339,
+                "precision_at_10": 0.2288135593220339,
+                "precision_at_20": 0.1716101694915254,
+                "best_threshold": 0.64
+            },
+            "metrics_train": {
+                "accuracy": 0.9954747035930853,
+                "precision": 0.943630214205186,
+                "recall": 1.0,
+                "f1_score": 0.9709976798143851,
+                "roc_auc": 0.9998896746208574,
+                "pr_auc": 0.9984562029999113
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vxgb_basic.pkl"
+        },
+        {
+            "version": "rf_basic",
+            "algorithm": "RF Basic",
+            "trained_at": "2026-01-07 23:53:19",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9204737732656514,
+                "precision": 0.3611111111111111,
+                "recall": 0.07303370786516854,
+                "f1_score": 0.12149532710280374,
+                "roc_auc": 0.6859612241331456,
+                "pr_auc": 0.17304245045925487,
+                "precision_at_5": 0.2542372881355932,
+                "precision_at_10": 0.1906779661016949,
+                "precision_at_20": 0.15254237288135594,
+                "best_threshold": 0.63
+            },
+            "metrics_train": {
+                "accuracy": 0.937007874015748,
+                "precision": 0.7701149425287356,
+                "recall": 0.24014336917562723,
+                "f1_score": 0.366120218579235,
+                "roc_auc": 0.9510977784703826,
+                "pr_auc": 0.643337260520678
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vrf_basic.pkl"
+        },
+        {
+            "version": "rf_tuned",
+            "algorithm": "RF Tuned",
+            "trained_at": "2026-01-07 23:53:21",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9238578680203046,
+                "precision": 0.375,
+                "recall": 0.016853932584269662,
+                "f1_score": 0.03225806451612903,
+                "roc_auc": 0.6456048192275667,
+                "pr_auc": 0.13700557690561782,
+                "precision_at_5": 0.17796610169491525,
+                "precision_at_10": 0.15254237288135594,
+                "precision_at_20": 0.1271186440677966,
+                "best_threshold": 0.75
+            },
+            "metrics_train": {
+                "accuracy": 0.9262376685672912,
+                "precision": 0.775,
+                "recall": 0.037037037037037035,
+                "f1_score": 0.07069555302166476,
+                "roc_auc": 0.777865640301358,
+                "pr_auc": 0.2909836868361258
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vrf_tuned.pkl"
+        },
+        {
+            "version": "lgb_basic",
+            "algorithm": "LGB Basic",
+            "trained_at": "2026-01-07 23:53:22",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9247038917089678,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1_score": 0.0,
+                "roc_auc": 0.5756448081252505,
+                "pr_auc": 0.10610276306403647,
+                "precision_at_5": 0.16101694915254236,
+                "precision_at_10": 0.1059322033898305,
+                "precision_at_20": 0.11864406779661017,
+                "best_threshold": 0.5
+            },
+            "metrics_train": {
+                "accuracy": 0.9242465381482488,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1_score": 0.0,
+                "roc_auc": 0.6781412080617317,
+                "pr_auc": 0.15360370801986306
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vlgb_basic.pkl"
+        },
+        {
+            "version": "lgb_tuned",
+            "algorithm": "LGB Tuned",
+            "trained_at": "2026-01-07 23:53:22",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9247038917089678,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1_score": 0.0,
+                "roc_auc": 0.6295013209700135,
+                "pr_auc": 0.1253267079203739,
+                "precision_at_5": 0.1864406779661017,
+                "precision_at_10": 0.13559322033898305,
+                "precision_at_20": 0.11440677966101695,
+                "best_threshold": 0.5
+            },
+            "metrics_train": {
+                "accuracy": 0.9242465381482488,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1_score": 0.0,
+                "roc_auc": 0.7462660767359224,
+                "pr_auc": 0.1925772722919536
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vlgb_tuned.pkl"
+        },
+        {
+            "version": "xgb_tuned",
+            "algorithm": "XGB Tuned",
+            "trained_at": "2026-01-07 23:53:23",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9238578680203046,
+                "precision": 0.375,
+                "recall": 0.016853932584269662,
+                "f1_score": 0.03225806451612903,
+                "roc_auc": 0.6727695138624752,
+                "pr_auc": 0.14990993659509108,
+                "precision_at_5": 0.211864406779661,
+                "precision_at_10": 0.16101694915254236,
+                "precision_at_20": 0.13771186440677965,
+                "best_threshold": 0.8400000000000001
+            },
+            "metrics_train": {
+                "accuracy": 0.9248800796452168,
+                "precision": 0.6666666666666666,
+                "recall": 0.016726403823178016,
+                "f1_score": 0.03263403263403263,
+                "roc_auc": 0.8023894628616461,
+                "pr_auc": 0.28451440806215905
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vxgb_tuned.pkl"
+        },
+        {
+            "version": "calibrated",
+            "algorithm": "XGB Tuned Calibrated",
+            "trained_at": "2026-01-07 23:53:23",
+            "created_by": "Hana Alaa",
+            "metrics_val": {
+                "accuracy": 0.9255499153976311,
+                "precision": 1.0,
+                "recall": 0.011235955056179775,
+                "f1_score": 0.022222222222222223,
+                "roc_auc": 0.6840658634620722,
+                "pr_auc": 0.14783580304438393,
+                "precision_at_5": 0.211864406779661,
+                "precision_at_10": 0.15677966101694915,
+                "precision_at_20": 0.1419491525423729,
+                "best_threshold": 0.24000000000000002
+            },
+            "metrics_train": {
+                "accuracy": 0.9244275500045253,
+                "precision": 1.0,
+                "recall": 0.0023894862604540022,
+                "f1_score": 0.004767580452920143,
+                "roc_auc": 0.7950370894503667,
+                "pr_auc": 0.25139185926923163
+            },
+            "feature_count": 8,
+            "features": [
+                "close",
+                "volume",
+                "candle_body",
+                "upper_wick",
+                "candle_range",
+                "wick_ratio",
+                "ratio_high_low",
+                "ratio_close_high"
+            ],
+            "model_path": "model_stop_hit_vcalibrated.pkl"
         }
     ]
 }
