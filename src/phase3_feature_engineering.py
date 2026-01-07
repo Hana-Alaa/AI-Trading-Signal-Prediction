@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
+import argparse
 from pathlib import Path
 import warnings
 
@@ -12,6 +13,24 @@ if __name__ == "__main__":
 from config import PROCESSED_DATA_DIR
 
 warnings.filterwarnings("ignore")
+
+TARGET_CONFIG = {
+    "target_hit": {
+        "use_momentum": True,
+        "use_macd": True,
+        "use_roc": True,
+        "use_interactions": True,
+        "feature_selection": True
+    },
+    "stop_hit": {
+        "use_momentum": True,      # RSI only if momentum is True
+        "use_macd": False,
+        "use_roc": False,
+        "use_interactions": False,
+        "feature_selection": False
+    }
+}
+
 
 def calculate_price_action_features(df):
     """
@@ -83,13 +102,22 @@ def calculate_volatility_features(df, windows=[7, 14, 50]):
     print(f"✅ Volatility Features calculated. Dropped {initial_shape[0] - df.shape[0]} initial rows (NaNs).")
     return df
 
-def calculate_momentum_features(df):
+def calculate_momentum_features(df, cfg=None):
     """
     Calculates Momentum features: RSI, MACD, ROC, Interaction features.
     """
     print("⏳ Calculating Momentum Features...")
     df = df.copy()
     
+    # If no config provided, use default (all True)
+    if cfg is None:
+        cfg = {
+            "use_momentum": True,
+            "use_macd": True,
+            "use_roc": True,
+            "use_interactions": True
+        }
+
     # Helper: RSI Calculation
     def calculate_rsi(series, window=14):
         delta = series.diff()
@@ -98,34 +126,46 @@ def calculate_momentum_features(df):
         rs = gain / (loss + 1e-9)
         return 100 - (100 / (1 + rs))
 
-    # 1. RSI
-    if 'RSI' not in df.columns:
-        df['RSI'] = calculate_rsi(df['close'])
-    
-    df['rsi_slope'] = df['RSI'].diff()
-    df['rsi_slope_3'] = df['RSI'].diff(3)
+    # 1. RSI (Momentum)
+    if cfg.get("use_momentum", True):
+        if 'RSI' not in df.columns:
+            df['RSI'] = calculate_rsi(df['close'])
+        
+        df['rsi_slope'] = df['RSI'].diff()
+        df['rsi_slope_3'] = df['RSI'].diff(3)
+        
+        # RSI momentum between current RSI and 3-day RSI
+        if 'rsi_3d' in df.columns:
+            df['rsi_momentum'] = df['RSI'] - df['rsi_3d']
 
     # 2. MACD (12, 26, 9)
-    exp1 = df['close'].ewm(span=12, adjust=False).mean()
-    exp2 = df['close'].ewm(span=26, adjust=False).mean()
-    df['macd'] = exp1 - exp2
-    df['macd_signal'] = df['macd'].ewm(span=9, adjust=False).mean()
-    df['macd_hist'] = df['macd'] - df['macd_signal']
+    if cfg.get("use_macd", True):
+        exp1 = df['close'].ewm(span=12, adjust=False).mean()
+        exp2 = df['close'].ewm(span=26, adjust=False).mean()
+        df['macd'] = exp1 - exp2
+        df['macd_signal'] = df['macd'].ewm(span=9, adjust=False).mean()
+        df['macd_hist'] = df['macd'] - df['macd_signal']
 
     # 3. ROC
-    for n in [7, 14]:
-        df[f'roc_{n}'] = df['close'].pct_change(periods=n) * 100
+    if cfg.get("use_roc", True):
+        for n in [7, 14]:
+            df[f'roc_{n}'] = df['close'].pct_change(periods=n) * 100
 
     # 4. Interaction Features
-    df['rsi_x_vol'] = df['RSI'] * df['bb_width']
-    df['macd_x_vol'] = df['macd_hist'] * df['atr_pct']
-    
-    # RSI momentum between current RSI and 3-day RSI
-    if 'rsi_3d' in df.columns:
-        df['rsi_momentum'] = df['RSI'] - df['rsi_3d']
+    if cfg.get("use_interactions", True):
+        if 'RSI' in df.columns and 'bb_width' in df.columns:
+            df['rsi_x_vol'] = df['RSI'] * df['bb_width']
+        if 'macd_hist' in df.columns and 'atr_pct' in df.columns:
+            df['macd_x_vol'] = df['macd_hist'] * df['atr_pct']
 
-    # Drop NaNs created by diff/pct_change
-    df.dropna(subset=['rsi_slope', 'macd_hist', 'roc_14'], inplace=True)
+    # Drop NaNs created by diff/pct_change (only for whatever was actually calculated)
+    subset_to_drop = []
+    if cfg.get("use_momentum") and 'rsi_slope' in df.columns: subset_to_drop.append('rsi_slope')
+    if cfg.get("use_macd") and 'macd_hist' in df.columns: subset_to_drop.append('macd_hist')
+    if cfg.get("use_roc") and 'roc_14' in df.columns: subset_to_drop.append('roc_14')
+    
+    if subset_to_drop:
+        df.dropna(subset=subset_to_drop, inplace=True)
     
     print("✅ Momentum Features calculated.")
     return df
@@ -180,20 +220,48 @@ def perform_feature_selection(df, target_col='target_hit', threshold=0.95):
     print(f"🔥 Dropped {len(final_drop_list)} redundant features.")
     return df_reduced
 
-# 1. Add this list to the beginning of the file (after imports)
-PRODUCTION_READY_FEATURES = [
-    'close', 'open', 'high', 'low', 'volume', 
-    'RSI', 'rsi_1d', 'rsi_3d', 'atr_1h', 'time_bin',
-    'candle_body', 'upper_wick', 'candle_range', 'wick_ratio',
-    'ratio_close_open', 'ratio_high_low', 'ratio_close_high', 'price_move_ratio'
-]
+# 1. Define Production Features per Target
+PRODUCTION_FEATURES_BY_TARGET = {
+    "target_hit": [
+        'close', 'open', 'high', 'low', 'volume', 
+        'RSI', 'rsi_1d', 'rsi_3d', 'atr_1h',
+        'candle_body', 'upper_wick', 'candle_range', 'wick_ratio',
+        'ratio_close_open', 'ratio_high_low', 'ratio_close_high', 
+        'price_move_ratio', 'rsi_slope', 'rsi_momentum', 'macd_hist', 'roc_14'
+    ],
+    "stop_hit": [
+        'close', 'open', 'high', 'low', 'volume', 
+        'RSI', 'rsi_1d', 'rsi_3d', 'atr_1h',
+        'candle_body', 'upper_wick', 'candle_range', 'wick_ratio',
+        'ratio_close_open', 'ratio_high_low', 'ratio_close_high', 
+        'rsi_slope'
+    ]
+}
 
-# 2. Replace the main() function with this version:
+# 2. Main execution pipeline
 def main():
     """
-    Main execution pipeline with Production Filter.
+    Main execution pipeline with CLI support, Target-aware logic and Production Filter.
     """
+    # Parse CLI Arguments
+    parser = argparse.ArgumentParser(description="AI Trading Feature Engineering Pipeline")
+    parser.add_argument(
+        "--target", 
+        type=str, 
+        default="target_hit",
+        choices=["target_hit", "stop_hit"],
+        help="Target to engineer features for (target_hit or stop_hit)"
+    )
+    args = parser.parse_args()
+    
     try:
+        # --- Target Configuration ---
+        TARGET = args.target
+        cfg = TARGET_CONFIG.get(TARGET)
+        
+        print(f"🚀 Starting Feature Engineering for Target: {TARGET}")
+        # ----------------------------
+
         # 1. Load Data
         input_path = PROCESSED_DATA_DIR / "step1_quality_checked.csv"
         if not input_path.exists():
@@ -202,21 +270,26 @@ def main():
         print(f"Loading data from {input_path}...")
         df = pd.read_csv(input_path)
         
-        # 2. Feature Engineering Pipeline (Calculate everything first)
+        # 2. Feature Engineering Pipeline
         df = calculate_price_action_features(df)
         df = calculate_volatility_features(df)
-        df = calculate_momentum_features(df)
+        df = calculate_momentum_features(df, cfg=cfg)
         
-        # 3. Feature Selection (Filtering based on correlation)
-        df = perform_feature_selection(df)
+        # 3. Feature Selection (Conditional based on config)
+        if cfg.get("feature_selection", True):
+            df = perform_feature_selection(df, target_col=TARGET)
+        else:
+            print("⏭️ Skipping Feature Selection as per config.")
         
         # ---------------------------------------------------------
-        # New Step: Production Filter
+        # New Step: Production Filter (Target-aware)
         # ---------------------------------------------------------
-        print("Applying Production Filter (keeping only API-compatible features)...")
+        print(f"Applying Target-aware Production Filter for {TARGET}...")
+        
+        production_list = PRODUCTION_FEATURES_BY_TARGET.get(TARGET, [])
         
         # Identify features that actually exist in the production list + targets
-        keep_cols = [c for c in df.columns if c in PRODUCTION_READY_FEATURES or c == 'created_at']
+        keep_cols = [c for c in df.columns if c in production_list or c == 'created_at']
         
         # Add target columns if they exist to prevent training failure
         targets = ['target_hit', 'stop_hit', 'target_type', 'hit_first']
@@ -227,15 +300,14 @@ def main():
         # ---------------------------------------------------------
 
         # 4. Summary Stats
-        print("\nFinal Production Feature Summary:")
+        print(f"\nFinal Production Feature Summary for {TARGET}:")
         print(f"Total Columns kept: {len(df.columns)}")
-        print(f"Features list: {list(df.columns)}")
+        # print(f"Features list: {list(df.columns)}")
         
         # 5. Save
-        output_path = PROCESSED_DATA_DIR / "step3_features_engineered.csv"
+        output_path = PROCESSED_DATA_DIR / f"step3_features_engineered_{TARGET}.csv"
         df.to_csv(output_path, index=False)
         print(f"\nSaved production-ready data to: {output_path}")
-        print("Engineered Columns:", list(df.columns))
         
     except Exception as e:
         print(f"❌ Error in feature engineering pipeline: {e}")
