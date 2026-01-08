@@ -1,24 +1,60 @@
 # AI Trading Signal Prediction System
 
-> **Probabilistic machine-learning pipeline for generating calibrated trading signals, with realistic backtesting and a production-ready FastAPI service.**
+> **Dual-model probabilistic machine-learning system for candle-based trading decisions, combining profit targeting and risk control with calibrated outputs and production-ready deployment.**
 
 ---
 
 ## Overview
-**AI Trading Signal Prediction** is an end‑to‑end machine learning project that predicts *target‑hit* events (successful trades) using market‑based technical features.  
-The goal is to produce **probabilistic trading signals** that remain robust under live, time‑dependent conditions, supported by full calibration, monitoring, and API deployment.
+**AI Trading Signal Prediction** is an end-to-end machine learning system designed around a **dual-target architecture**, explicitly separating **profit realization** from **risk control**.
+
+Instead of treating trading as a single binary classification problem, the system models:
+- **Target-Hit probability** – likelihood of a trade reaching its profit objective.
+- **Stop-Hit probability** – likelihood of a trade failing via stop-loss.
+
+This design reflects real trading behavior, where conditions that generate profitable trades differ structurally from those that generate losses.
+
+The system relies exclusively on **price-action and volume-derived candle structure features**, deliberately avoiding lag-heavy or overly complex indicators to ensure interpretability and robustness under live, time-dependent market conditions.
+
+Model outputs are **fully probabilistic and calibrated**, enabling threshold-based decision logic rather than naive nter/NOT signals.
 
 ---
 
 ## Pipeline Steps
 
-1. **Data Cleaning & Leakage Control** – strict chronological handling, future‑feature removal.  
-2. **Feature Engineering** – momentum (RSI), volatility (ATR), candle structure ratios.  
-3. **Time‑Aware Splitting** – chronological train / validation / test windows.  
-4. **Model Training & Calibration** – XGBoost ensemble + isotonic mapping for probability calibration.  
-5. **Backtesting** – realistic ROI under slippage, fees & risk fraction (not optimistic compounding).  
-6. **Paper Trading API** – REST interface via FastAPI for real‑time inference.  
-7. **Dockerized Deployment** – reproducible build from `Dockerfile`.
+1. **Data Cleaning & Leakage Control**  
+   Strict chronological handling, removal of future-dependent information, and validation of candle alignment.
+
+2. **Feature Engineering**  
+   Construction of candle-structure representations capturing market momentum, volatility, and price positioning within individual candles.
+
+3. **Time-Aware Splitting**  
+   Chronological train / validation / test splits to simulate real trading conditions and prevent temporal leakage.
+
+4. **Model Training & Calibration**  
+   Gradient-boosted tree models trained separately for each target, followed by probability calibration to ensure reliable confidence estimates.
+
+5. **Backtesting**  
+   Realistic evaluation under transaction costs, slippage, and controlled risk exposure (non-optimistic assumptions).
+
+6. **Paper Trading API**  
+   RESTful inference service built with FastAPI for real-time signal evaluation.
+
+7. **Dockerized Deployment**  
+   Reproducible, environment-independent deployment using Docker.
+   
+---
+
+## Model Evaluation Philosophy
+
+Traditional accuracy-based metrics were intentionally de-emphasized due to class imbalance and asymmetric trading costs.
+
+Instead, evaluation focused on:
+- **Precision & Precision@K** for entry quality
+- **False-positive minimization** for risk filtering
+- **Train-validation stability** across time splits
+- **Probability calibration reliability**
+
+This ensures that model performance translates into **economic value**, not just statistical scores.
 
 ---
 
@@ -32,60 +68,22 @@ The goal is to produce **probabilistic trading signals** that remain robust unde
 
 ---
 
-## Model Performance Summary
+## Risks & Limitations
 
-| Metric | Validation | Test | Comment |
-|---------|-------------|------|----------|
-| **F1 Score** | 0.878 | 0.871 | Stable across time |
-| **AUC** | 0.83 | 0.81 | Good discrimination |
-| **ROI (Backtest)** | ≈ 68 000 % (statistical) | Relative metric only |
-| **Top Features** | `rsi_3d`, `RSI`, `volume`, `atr_1h`, `ratio_high_low` | Momentum + Volatility structure |
+Despite strong empirical performance, several limitations are acknowledged:
 
----
+- Sensitivity to market regime shifts  
+- Limited historical coverage  
+- Class imbalance inherent to trading outcomes  
+- Theoretical nature of backtest returns  
 
-## Model Choice Justification
-
-After benchmarking several algorithms — Logistic Regression, Random Forest, LightGBM, and XGBoost — the tuned **XGBoost** model achieved the most stable balance between accuracy and generalization.
-
-**Why XGBoost?**
-
-- Captures nonlinear market effects and feature interactions  
-- Robust to outliers and unscaled data  
-- Simple probability calibration via isotonic mapping  
-- Generalizes well over time‑based splits (Δ F1 ≈ 0.007)
-
----
-
-## Explainability (Feature Importance via SHAP)
-
-| Feature | Economic meaning | Rank |
-|----------|------------------|------|
-| rsi_3d | Short‑term momentum (3 days) | 1 |
-| RSI | Overall momentum oscillator | 2 |
-| volume | Market participation | 3 |
-| atr_1h | 1‑hour volatility (ATR) | 4 |
-| ratio_high_low | Intra‑candle compression | 5 |
-
-Reports: [`reports/shap_summary_beeswarm.png`](reports/shap_summary_beeswarm.png)
-
----
-
-## Risks & Limitations
-
-| Category | Description | Mitigation |
-|-----------|--------------|-------------|
-| **Data Bias & Coverage** | Limited historical window, single asset | Retrain periodically & validate multi‑symbol |
-| **Class Imbalance** | ~30 % positive samples (“trade hit”) | Use `class_weight='balanced'` |
-| **Temporal Leakage Risk** | Removed time_bin & future features | Live monitoring for integrity |
-| **Market Regime Shift** | Breakdown under new volatility regimes | Rolling retraining + stress testing |
-| **Backtest Over‑optimism** | 68 K % ROI is theoretical | Treat as relative metric only |
-| **Limited Realtime Explainability** | SHAP offline only for speed | Keep API lightweight for latency |
+Mitigation strategies include periodic retraining, forward-only validation, and conservative deployment thresholds.
 
 ---
 
 ## Deployment ( FastAPI + Docker )
 
-**FastAPI Launch (local)**  
+**Local API Launch**  
 ```bash
 uvicorn api.phase8_paper_trading_api:app --reload
 ```
@@ -105,39 +103,56 @@ AI-Trading-Signal-Prediction/
 │   └─ raw/                                # Raw market data (unprocessed)
 │
 ├─ api/                                    # REST API modules
-│   ├─ phase8_paper_trading_api.py         # FastAPI service (main production endpoint)
-│   └─ api_signal_predictor.py             # Auxiliary or experimental API version
+│   └─ api.py         
 │
 ├─ models/                                 # Trained models & metadata
 │   ├─ model_target_hit_final_calibrated.pkl
+│   ├─ model_stop_hit_final_calibrated.pkl.pkl
 │   └─ metadata.json
 │
-├─ notebooks/                              # Research & analysis notebooks
+├─ notebooks/                             
 │   ├─ 01_data_quality_and_leakage_control.ipynb
-│   ├─ 02_EDA_and_visual_analysis.ipynb
-│   └─ shap_explanation.ipynb
+│   └─ 02_EDA_and_visual_analysis.ipynb
 │
 ├─ src/                       # Feature engineering & modeling scripts
 │   ├─ phase3_feature_engineering.py
-│   ├─ phase4_preprocessing_stop_hit.py
-│   ├─ phase4_preprocessing_target_hit.py
-│   └─ phase5_models/
-│       ├─ model_train_stop_hit.py
-│       └─ model_train_target_hit.png
+│   ├─ phase4_preprocessing.py
+│   └─ phase5_model_train.py
 │
-├─ reports/                                # Visual explainability reports & plots
-│   ├─ shap_summary_beeswarm.png
-│   └─ shap_feature_importance_bar.png
+├─ tests/                       
+│   ├─ phase6_test_model.py
+│   └─ phase7_realistic_backtest.py
 │
-├─ config.py                               # Global paths and constants
-├─ requirements.txt                        # Python dependencies
-├─ Dockerfile                              # API containerization setup
-└─ README.md                               # Project documentation
+├─ decision/                               
+│   ├─ decision_engine.ipynb
+│   └─ decision_layer.py
+│
+├─ analysis/                      
+│   ├─ shap_utils.py
+│   └─ shap_analysis.ipynb
+│
+
+
+AI-Trading-Signal-Prediction/
+│
+├─ data/                # Raw and processed datasets
+├─ api/                 # FastAPI inference service
+├─ models/              # Trained models & metadata
+├─ src/                 # Feature engineering & training logic
+├─ decision/            # Risk-aware decision layer
+├─ tests/               # Model validation & backtesting scripts
+├─ analysis/            # Explainability & SHAP analysis
+├─ reports/             # Technical documentation & plots
+├─ config.py
+├─ requirements.txt
+├─ Dockerfile
+└─ README.md
 
 ```
 ### Summary Statement
-Final Target_Hit Model (XGB Tuned v1.5 – Calibrated) achieved:
-
-* Stable out‑of‑sample performance (F1 ≈ 0.87, AUC ≈ 0.81)
-* Intuitive feature drivers (market momentum + volatility)
-* Ready for production deployment under controlled risk.
+This project demonstrates a trading-first machine learning approach, where model decisions are justified by economic impact rather than raw metrics.
+The combination of:
+* High-precision entry filtering
+* Conservative risk blocking
+* Interpretable model behavior
+results in a system suitable for decision support and semi-automated trading, under controlled risk management.
