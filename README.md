@@ -119,4 +119,5 @@ The combination of:
 * High-precision entry filtering
 * Conservative risk blocking
 * Interpretable model behavior
+
 results in a system suitable for decision support and semi-automated trading, under controlled risk management.
