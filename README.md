@@ -98,43 +98,6 @@ Once running:
 ```bash
 AI-Trading-Signal-Prediction/
 │
-├─ data/                                   # Datasets
-│   ├─ processed/                          # Clean and feature-ready data
-│   └─ raw/                                # Raw market data (unprocessed)
-│
-├─ api/                                    # REST API modules
-│   └─ api.py         
-│
-├─ models/                                 # Trained models & metadata
-│   ├─ model_target_hit_final_calibrated.pkl
-│   ├─ model_stop_hit_final_calibrated.pkl.pkl
-│   └─ metadata.json
-│
-├─ notebooks/                             
-│   ├─ 01_data_quality_and_leakage_control.ipynb
-│   └─ 02_EDA_and_visual_analysis.ipynb
-│
-├─ src/                       # Feature engineering & modeling scripts
-│   ├─ phase3_feature_engineering.py
-│   ├─ phase4_preprocessing.py
-│   └─ phase5_model_train.py
-│
-├─ tests/                       
-│   ├─ phase6_test_model.py
-│   └─ phase7_realistic_backtest.py
-│
-├─ decision/                               
-│   ├─ decision_engine.ipynb
-│   └─ decision_layer.py
-│
-├─ analysis/                      
-│   ├─ shap_utils.py
-│   └─ shap_analysis.ipynb
-│
-
-
-AI-Trading-Signal-Prediction/
-│
 ├─ data/                # Raw and processed datasets
 ├─ api/                 # FastAPI inference service
 ├─ models/              # Trained models & metadata
@@ -149,6 +112,7 @@ AI-Trading-Signal-Prediction/
 └─ README.md
 
 ```
+
 ### Summary Statement
 This project demonstrates a trading-first machine learning approach, where model decisions are justified by economic impact rather than raw metrics.
 The combination of:
