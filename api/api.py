@@ -77,16 +77,37 @@ class Candle(BaseModel):
 # --------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------
+def compute_features(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    df["candle_body"] = df["close"] - df["open"]
+    df["upper_wick"] = df["high"] - df[["open", "close"]].max(axis=1)
+    df["candle_range"] = df["high"] - df["low"]
+
+    df["wick_ratio"] = df["upper_wick"] / (
+        (df[["open", "close"]].min(axis=1) - df["low"]) + 1e-9
+    )
+
+    df["ratio_high_low"] = df["high"] / df["low"]
+    df["ratio_close_high"] = df["close"] / df["high"]
+
+    return df
+
 def prepare_features(data: dict) -> pd.DataFrame:
     df = pd.DataFrame([data])
 
-    df.rename(
-        columns={
-            "rsi": "RSI",
-            "candle_wick": "upper_wick"
-        },
-        inplace=True
-    )
+    df = compute_features(df)
+
+    FEATURES = [
+        "close",
+        "volume",
+        "candle_body",
+        "upper_wick",
+        "candle_range",
+        "wick_ratio",
+        "ratio_high_low",
+        "ratio_close_high"
+    ]
 
     missing = set(FEATURES) - set(df.columns)
     if missing:
