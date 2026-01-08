@@ -13,7 +13,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # -------- Copy project --------
-COPY . .
+COPY api ./api
+COPY decision ./decision
+COPY config.py .
+COPY models ./models
 
 # -------- Expose API port --------
 EXPOSE 8000
