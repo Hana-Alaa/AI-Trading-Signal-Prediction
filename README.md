@@ -58,16 +58,6 @@ This ensures that model performance translates into **economic value**, not just
 
 ---
 
-## Key Highlights
-
-- Probability‑calibrated model (XGB Tuned v1.5)  
-- Handles nonlinear market patterns and feature interactions  
-- Trading‑aware evaluation (Sharpe, Drawdown, ROI)  
-- Stable generalization across temporal splits ( Δ F1 ≈ 0.007 )  
-- Production API + Docker deployment ready
-
----
-
 ## Risks & Limitations
 
 Despite strong empirical performance, several limitations are acknowledged:
